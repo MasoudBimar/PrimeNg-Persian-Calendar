@@ -8,6 +8,8 @@
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e"
+    ,
+    "deploy:gh" : "ng build --prod --base-href='https://masoudbimar.github.io/primeng-persian-calendar/' && ngh --no-silent --dir dist/primeng-persian-calendar" 
   },
   "private": true,
   "dependencies": {
@@ -21,6 +23,10 @@
     "@angular/platform-browser-dynamic": "~7.0.0",
     "@angular/router": "~7.0.0",
     "core-js": "^2.5.4",
+    "jalali-moment": "^3.2.3",
+    "moment": "^2.23.0",
+    "primeicons": "^1.0.0",
+    "primeng": "^7.0.3",
     "rxjs": "~6.3.3",
     "zone.js": "~0.8.26"
   },
