@@ -1821,7 +1821,7 @@ export class AppComponent implements OnInit, OnDestroy, ControlValueAccessor {
                 }
             }
         }
-
+cons
         if (iValue < value.length) {
             extra = value.substr(iValue);
             if (!/^\s+/.test(extra)) {
