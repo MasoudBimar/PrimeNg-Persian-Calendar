@@ -30,6 +30,7 @@ export interface LocaleSettings {
     monthNamesShort: string[];
     today: string;
     clear: string;
+    dateFormat?: string;
 }
 
 
@@ -195,16 +196,16 @@ export class AppComponent implements OnInit, OnDestroy, ControlValueAccessor {
     @ContentChildren(PrimeTemplate) templates: QueryList<any>;
 
     _locale: LocaleSettings = {
-        firstDayOfWeek: 6,
-        dayNames: [" یک شنبه", "دوشنبه", "سه شنبه ", "چهار شنبه", "پنج شنبه", " جمعه", " شنبه"],
-        dayNamesShort: ["یک ", "دو", "سه ", "چهار", "پنج ", "جمعه", "شنبه"],
-        dayNamesMin: ["یک ", "دو", "سه ", "چهار", "پنج ", "جمعه", "شنبه"],
+        firstDayOfWeek: 0,
+        dayNames: [" شنبه", "یک شنبه", "دو شنبه ", "سه شنبه", "چهار شنبه", " پنج شنبه", " جمعه"],
+        dayNamesShort: ["  شنبه", "یک شنبه", "دو شنبه ", "سه شنبه", "چهار شنبه", " پنج شنبه", " جمعه"],
+        dayNamesMin: ["  شنبه", "یک شنبه", "دو شنبه ", "سه شنبه", "چهار شنبه", " پنج شنبه", " جمعه"],
         monthNames: ["فروردین", "اردیبهشت", "خرداد", "تیر", "مرداد", "شهریور", "مهر", "آبان", "آذر", "دی", "بهمن", "اسفند"],
         monthNamesShort: ["فروردین", "اردیبهشت", "خرداد", "تیر", "مرداد", "شهریور", "مهر", "آبان", "آذر", "دی", "بهمن", "اسفند"],
         today: 'امروز',
-        clear: 'پاک کردن'
+        clear: 'پاک کردن',
+        dateFormat:'yy/mm/dd'
     };
-
     @Input() tabindex: number;
 
     @ViewChild('inputfield') inputfieldViewChild: ElementRef;
@@ -381,7 +382,6 @@ export class AppComponent implements OnInit, OnDestroy, ControlValueAccessor {
         const date =this.defaultDate || moment();
         this.currentMonth = date.jMonth();
         this.currentYear = date.jYear();
-        //console.log(date['_d']);
         if (this.yearNavigator && this.yearRange) {
             const years = this.yearRange.split(':');
             const yearStart = parseInt(years[0]);
@@ -797,22 +797,19 @@ export class AppComponent implements OnInit, OnDestroy, ControlValueAccessor {
 
     getFirstDayOfMonthIndex(month: number, year: number) {
 
-        let day =moment();
-        day.startOf('jMonth');
-        day.set('jMonth',month);
-        day.set('jYear',year);
-            
+        let day = moment();
+
+        day.jDate(1);
+        day.jMonth(month);
+        day.jYear(year);    
         let dayIndex = day.jDay() + this.getSundayIndex();
-        
-        return dayIndex >= 7 ? dayIndex - 7 : dayIndex;
+        return dayIndex >= 7 ? dayIndex - 7 : dayIndex ;
     }
 
     getDaysCountInMonth(month: number, year: number) {
 
         var newDate=moment().jYear(year).jMonth(month).jDate(32);
-        //console.log(newDate);
          var temp  =this.daylightSavingAdjust(newDate).jDate();
-         //console.log(temp);
         return 32 -temp;
     }
 
