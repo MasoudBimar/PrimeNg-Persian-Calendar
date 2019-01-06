@@ -1821,7 +1821,6 @@ export class AppComponent implements OnInit, OnDestroy, ControlValueAccessor {
                 }
             }
         }
-cons
         if (iValue < value.length) {
             extra = value.substr(iValue);
             if (!/^\s+/.test(extra)) {
@@ -1875,6 +1874,7 @@ cons
     onTodayButtonClick(event) {
         let date: moment.Moment = moment();
         let dateMeta = { day: date.jDate(), month: date.jMonth(), year: date.jYear(), otherMonth: date.jMonth() !== this.currentMonth || date.jYear() !== this.currentYear, today: true, selectable: true };
+
 
         this.onDateSelect(event, dateMeta);
         this.onTodayClick.emit(event);
