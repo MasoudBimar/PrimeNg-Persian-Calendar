@@ -206,6 +206,7 @@ export class AppComponent implements OnInit, OnDestroy, ControlValueAccessor {
         clear: 'پاک کردن',
         dateFormat:'yy/mm/dd'
     };
+
     @Input() tabindex: number;
 
     @ViewChild('inputfield') inputfieldViewChild: ElementRef;
@@ -251,7 +252,7 @@ export class AppComponent implements OnInit, OnDestroy, ControlValueAccessor {
     overlayVisible: boolean;
 
     datepickerClick: boolean;
-    date: moment.Moment;
+    date:moment.Moment;
 
     onModelChange: Function = () => { };
 
@@ -383,6 +384,7 @@ export class AppComponent implements OnInit, OnDestroy, ControlValueAccessor {
         this.currentMonth = date.jMonth();
         this.currentYear = date.jYear();
         if (this.yearNavigator && this.yearRange) {
+
             const years = this.yearRange.split(':');
             const yearStart = parseInt(years[0]);
             const yearEnd = parseInt(years[1]);
@@ -391,6 +393,7 @@ export class AppComponent implements OnInit, OnDestroy, ControlValueAccessor {
 
         if (this.view === 'date') {
             
+
 
             this.createWeekDays();
             this.initTime(date);
@@ -418,7 +421,7 @@ export class AppComponent implements OnInit, OnDestroy, ControlValueAccessor {
     }
 
     populateYearOptions(start, end) {
-        
+   
         this.yearOptions = [];
 
         for (let i = start; i <= end; i++) {
@@ -427,7 +430,7 @@ export class AppComponent implements OnInit, OnDestroy, ControlValueAccessor {
     }
 
     createWeekDays() {
-
+        
         this.weekDays = [];
         let dayIndex = this.locale.firstDayOfWeek;
         for (let i = 0; i < 7; i++) {
@@ -460,7 +463,7 @@ export class AppComponent implements OnInit, OnDestroy, ControlValueAccessor {
     }
 
     createMonth(month: number, year: number) {
-        
+  
         let dates = [];
         let firstDay = this.getFirstDayOfMonthIndex(month, year);
         let daysLength = this.getDaysCountInMonth(month, year);
@@ -512,6 +515,7 @@ export class AppComponent implements OnInit, OnDestroy, ControlValueAccessor {
             }
 
             dates.push(week);
+
         }
 
         return {
@@ -545,6 +549,7 @@ export class AppComponent implements OnInit, OnDestroy, ControlValueAccessor {
     }
 
     navBackward(event) {
+ 
         if (this.disabled) {
             event.preventDefault();
             return;
@@ -570,6 +575,8 @@ export class AppComponent implements OnInit, OnDestroy, ControlValueAccessor {
     }
 
     navForward(event) {
+
+
         if (this.disabled) {
             event.preventDefault();
             return;
@@ -595,6 +602,7 @@ export class AppComponent implements OnInit, OnDestroy, ControlValueAccessor {
     }
 
     decrementYear() {
+  
         this.currentYear--;
 
         if (this.yearNavigator && this.currentYear < this.yearOptions[0]) {
@@ -604,6 +612,7 @@ export class AppComponent implements OnInit, OnDestroy, ControlValueAccessor {
     }
 
     incrementYear() {
+     
         this.currentYear++;
 
         if (this.yearNavigator && this.currentYear > this.yearOptions[this.yearOptions.length - 1]) {
@@ -613,47 +622,52 @@ export class AppComponent implements OnInit, OnDestroy, ControlValueAccessor {
     }
 
     onDateSelect(event, dateMeta) {
-        if (this.disabled || !dateMeta.selectable) {
-            event.preventDefault();
-            return;
-        }
 
-        if (this.isMultipleSelection() && this.isSelected(dateMeta)) {
-            this.value = this.value.filter((date, i) => {
-                return !this.isDateEquals(date, dateMeta);
-            });
-            this.updateModel(this.value);
+
+
+
+if (this.disabled || !dateMeta.selectable) {
+    event.preventDefault();
+    return;
+}
+
+if (this.isMultipleSelection() && this.isSelected(dateMeta)) {
+    this.value = this.value.filter((date, i) => {
+        return !this.isDateEquals(date, dateMeta);
+    });
+    this.updateModel(this.value);
+}
+else {
+    if (this.shouldSelectDate(dateMeta)) {
+        if (dateMeta.otherMonth) {
+            this.currentMonth = dateMeta.month;
+            this.currentYear = dateMeta.year;
+            this.createMonths(this.currentMonth, this.currentYear);
+            this.selectDate(dateMeta);
         }
         else {
-            if (this.shouldSelectDate(dateMeta)) {
-                if (dateMeta.otherMonth) {
-                    this.currentMonth = dateMeta.month;
-                    this.currentYear = dateMeta.year;
-                    this.createMonths(this.currentMonth, this.currentYear);
-                    this.selectDate(dateMeta);
-                }
-                else {
-                    this.selectDate(dateMeta);
-                }
-            }
+             this.selectDate(dateMeta);
         }
-
-        if (this.isSingleSelection() && (!this.showTime || this.hideOnDateTimeSelect)) {
-            setTimeout(() => {
-                event.preventDefault();
-                this.hideOverlay();
-
-                if (this.mask) {
-                    this.disableModality();
-                }
-
-                this.cd.markForCheck();
-            }, 150);
-        }
-
-        this.updateInputfield();
-        event.preventDefault();
     }
+}
+
+if (this.isSingleSelection() && (!this.showTime || this.hideOnDateTimeSelect)) {
+    setTimeout(() => {
+        event.preventDefault();
+        this.hideOverlay();
+
+        if (this.mask) {
+            this.disableModality();
+        }
+
+        this.cd.markForCheck();
+    }, 150);
+}
+
+this.updateInputfield();
+event.preventDefault();
+    }
+    
 
     shouldSelectDate(dateMeta) {
         if (this.isMultipleSelection())
@@ -667,6 +681,7 @@ export class AppComponent implements OnInit, OnDestroy, ControlValueAccessor {
     }
 
     updateInputfield() {
+
         let formattedValue = '';
 
         if (this.value) {
@@ -703,6 +718,7 @@ export class AppComponent implements OnInit, OnDestroy, ControlValueAccessor {
     }
 
     formatDateTime(date) {
+   
         let formattedValue = null;
         if (date) {
             if (this.timeOnly) {
@@ -720,7 +736,8 @@ export class AppComponent implements OnInit, OnDestroy, ControlValueAccessor {
     }
 
     selectDate(dateMeta) {
-        let date = moment(dateMeta.year, dateMeta.month, dateMeta.day);
+  
+        let date = moment([dateMeta.year, dateMeta.month, dateMeta.day]);
 
         if (this.showTime) {
             if (this.hourFormat === '12' && this.pm && this.currentHour != 12)
@@ -796,8 +813,8 @@ export class AppComponent implements OnInit, OnDestroy, ControlValueAccessor {
     }
 
     getFirstDayOfMonthIndex(month: number, year: number) {
-
         let day = moment();
+
 
         day.jDate(1);
         day.jMonth(month);
@@ -809,7 +826,9 @@ export class AppComponent implements OnInit, OnDestroy, ControlValueAccessor {
     getDaysCountInMonth(month: number, year: number) {
 
         var newDate=moment().jYear(year).jMonth(month).jDate(32);
+  
          var temp  =this.daylightSavingAdjust(newDate).jDate();
+
         return 32 -temp;
     }
 
@@ -819,6 +838,7 @@ export class AppComponent implements OnInit, OnDestroy, ControlValueAccessor {
     }
 
     getPreviousMonthAndYear(month: number, year: number) {
+        
         let m, y;
 
         if (month === 0) {
@@ -834,6 +854,7 @@ export class AppComponent implements OnInit, OnDestroy, ControlValueAccessor {
     }
 
     getNextMonthAndYear(month: number, year: number) {
+
         let m, y;
 
         if (month === 11) {
@@ -853,6 +874,8 @@ export class AppComponent implements OnInit, OnDestroy, ControlValueAccessor {
     }
 
     isSelected(dateMeta): boolean {
+
+
         if (this.value) {
             if (this.isSingleSelection()) {
                 return this.isDateEquals(this.value, dateMeta);
@@ -865,6 +888,7 @@ export class AppComponent implements OnInit, OnDestroy, ControlValueAccessor {
                         break;
                     }
                 }
+               
 
                 return selected;
             }
@@ -984,7 +1008,7 @@ export class AppComponent implements OnInit, OnDestroy, ControlValueAccessor {
 
     isDayDisabled(day, month, year): boolean {
         if (this.disabledDays) {
-            let weekday = moment(day, month, year);
+            let weekday = moment([day, month, year]);
             let weekdayNumber = weekday.jYear();
             return this.disabledDays.indexOf(weekdayNumber) !== -1;
         }
@@ -1010,6 +1034,7 @@ export class AppComponent implements OnInit, OnDestroy, ControlValueAccessor {
     }
 
     onInputBlur(event: Event) {
+  
         this.focus = false;
         this.onBlur.emit(event);
         if (!this.keepInvalid) {
@@ -1198,7 +1223,7 @@ export class AppComponent implements OnInit, OnDestroy, ControlValueAccessor {
         }
         let valueDateString = value ? value.toDateString() : null;
         if (this.minDate && valueDateString && this.minDate.format() === valueDateString) {
-            if (value.getHours() == this.minDate.hour()) {
+            if (value.hour() == this.minDate.hour()) {
                 if (this.minDate.minute() > minute) {
                     valid = false;
                 }
@@ -1206,7 +1231,7 @@ export class AppComponent implements OnInit, OnDestroy, ControlValueAccessor {
         }
 
         if (this.maxDate && valueDateString && this.maxDate.format() === valueDateString) {
-            if (value.getHours() == this.maxDate.hour()) {
+            if (value.hour() == this.maxDate.hour()) {
                 if (this.maxDate.minute() < minute) {
                     valid = false;
                 }
@@ -1268,7 +1293,7 @@ export class AppComponent implements OnInit, OnDestroy, ControlValueAccessor {
         if (this.isMultipleSelection()) {
             value = this.value[this.value.length - 1];
         }
-        value = value ? moment(value.getTime()) : moment();
+        value = value ? moment(value.unix()) : moment();
 
         if (this.hourFormat == '12') {
             if (this.currentHour === 12)
@@ -1314,9 +1339,10 @@ export class AppComponent implements OnInit, OnDestroy, ControlValueAccessor {
         let val = event.target.value;
         try {
             let value = this.parseValueFromString(val);
-            if (this.isSelectable(value.jYear(), value.jMonth(), value.jYear(), false)) {
+            if (this.isSelectable(value.jDate(), value.jMonth(), value.jYear(), false)) {
                 this.updateModel(value);
                 this.updateUI();
+     
             }
         }
         catch (err) {
@@ -1390,35 +1416,44 @@ export class AppComponent implements OnInit, OnDestroy, ControlValueAccessor {
     }
 
     updateUI() {
-        let val: moment.Moment = this.value || this.defaultDate || moment();
+    
+        let val = moment();
+
+
         if (Array.isArray(val)) {
             val = val[0];
         }
+            this.currentMonth = val.jMonth();
+            this.currentYear = val.jYear();
+            this.createMonths(this.currentMonth, this.currentYear);
+        
 
-        this.currentMonth = val.jMonth();
-        this.currentYear = val.jYear();
-        this.createMonths(this.currentMonth, this.currentYear);
-
-        if (this.showTime || this.timeOnly) {
-            let hours = val.hour();
-
-            if (this.hourFormat == '12') {
-                this.pm = hours > 11;
-
-                if (hours >= 12) {
-                    this.currentHour = (hours == 12) ? 12 : hours - 12;
+          
+    
+            if (this.showTime || this.timeOnly) {
+                let hours = val.hour();
+    
+                if (this.hourFormat == '12') {
+                    this.pm = hours > 11;
+    
+                    if (hours >= 12) {
+                        this.currentHour = (hours == 12) ? 12 : hours - 12;
+                    }
+                    else {
+                        this.currentHour = (hours == 0) ? 12 : hours;
+                    }
                 }
                 else {
-                    this.currentHour = (hours == 0) ? 12 : hours;
+                    this.currentHour = val.hour();
                 }
+    
+                this.currentMinute = val.minute();
+                this.currentSecond = val.second();
             }
-            else {
-                this.currentHour = val.hour();
-            }
-
-            this.currentMinute = val.minute();
-            this.currentSecond = val.second();
-        }
+        
+        
+        
+      
     }
 
     onDatePickerClick(event) {
@@ -1538,6 +1573,7 @@ export class AppComponent implements OnInit, OnDestroy, ControlValueAccessor {
 
         this.updateInputfield();
         this.updateUI();
+
     }
 
     registerOnChange(fn: Function): void {
@@ -1554,10 +1590,11 @@ export class AppComponent implements OnInit, OnDestroy, ControlValueAccessor {
 
     // Ported from jquery-ui datepicker formatDate
     formatDate(date, format) {
+     
         if (!date) {
             return '';
         }
-
+  
         let iFormat;
         const lookAhead = (match) => {
             const matches = (iFormat + 1 < format.length && format.charAt(iFormat + 1) === match);
@@ -1580,7 +1617,7 @@ export class AppComponent implements OnInit, OnDestroy, ControlValueAccessor {
             };
         let output = '';
         let literal = false;
-
+  
         if (date) {
             for (iFormat = 0; iFormat < format.length; iFormat++) {
                 if (literal) {
@@ -1590,30 +1627,33 @@ export class AppComponent implements OnInit, OnDestroy, ControlValueAccessor {
                         output += format.charAt(iFormat);
                     }
                 } else {
-                    
                     switch (format.charAt(iFormat)) {
-
                         case 'd':
-                            output += formatNumber('d', date.jDate(), 2);
+                            output += formatNumber('d', date.date(), 2);
                             break;
                         case 'D':
-                            output += formatName('D', date.jDate(), this.locale.dayNamesShort, this.locale.dayNames);
+                            output += formatName('D', date.date(), this.locale.dayNamesShort, this.locale.dayNames);
                             break;
-
+                        case 'o':
+                            output += formatNumber('o',
+                            Math.round((
+                                moment([date.year(), date.month(), date.date()]).unix() -
+                                moment([date.year(), 0, 0]).unix()) / 86400000), 3);
+                            break;
                         case 'm':
-                            output += formatNumber('m', date.jMonth() + 1, 2);
+                            output += formatNumber('m', date.month() + 1, 2);
                             break;
                         case 'M':
-                            output += formatName('M', date.jMonth(), this.locale.monthNamesShort, this.locale.monthNames);
+                            output += formatName('M',date.month(), this.locale.monthNamesShort, this.locale.monthNames);
                             break;
                         case 'y':
-                            output += lookAhead('y') ? date.jYear() : (date.jYear() % 100 < 10 ? '0' : '') + (date.jYear() % 100);
+                            output += lookAhead('y') ? date.year() : (date.year() % 100 < 10 ? '0' : '') + (date.year() % 100);
                             break;
                         case '@':
-                            output += date.format('x');
+                            output += date.unix();
                             break;
                         case '!':
-                            output += date.format('x') * 10000 + this.ticksTo1970;
+                            output += date.unix() * 10000 + this.ticksTo1970;
                             break;
                         case '\'':
                             if (lookAhead('\'')) {
@@ -1630,21 +1670,21 @@ export class AppComponent implements OnInit, OnDestroy, ControlValueAccessor {
         }
         return output;
     }
-
+    
     formatTime(date) {
         if (!date) {
             return '';
         }
-
+        
         let output = '';
         let hours = date.hour();
         let minutes = date.minute();
         let seconds = date.second();
-
+        
         if (this.hourFormat == '12' && hours > 11 && hours != 12) {
-            hours -= 12;
+            hours-=12;
         }
-
+        
         if (this.hourFormat == '12') {
             output += hours === 0 ? 12 : (hours < 10) ? '0' + hours : hours;
         } else {
@@ -1652,40 +1692,40 @@ export class AppComponent implements OnInit, OnDestroy, ControlValueAccessor {
         }
         output += ':';
         output += (minutes < 10) ? '0' + minutes : minutes;
-
+        
         if (this.showSeconds) {
             output += ':';
             output += (seconds < 10) ? '0' + seconds : seconds;
         }
-
+        
         if (this.hourFormat == '12') {
             output += date.hour() > 11 ? ' PM' : ' AM';
         }
-
+        
         return output;
     }
-
+    
     parseTime(value) {
         let tokens: string[] = value.split(':');
         let validTokenLength = this.showSeconds ? 3 : 2;
-
+        
         if (tokens.length !== validTokenLength) {
             throw "Invalid time";
         }
-
+        
         let h = parseInt(tokens[0]);
         let m = parseInt(tokens[1]);
         let s = this.showSeconds ? parseInt(tokens[2]) : null;
-
+        
         if (isNaN(h) || isNaN(m) || h > 23 || m > 59 || (this.hourFormat == '12' && h > 12) || (this.showSeconds && (isNaN(s) || s > 59))) {
             throw "Invalid time";
         }
         else {
             if (this.hourFormat == '12' && h !== 12 && this.pm) {
-                h += 12;
+                h+= 12;
             }
-
-            return { hour: h, minute: m, second: s };
+            
+            return {hour: h, minute: m, second: s};
         }
     }
 
@@ -1694,79 +1734,79 @@ export class AppComponent implements OnInit, OnDestroy, ControlValueAccessor {
         if (format == null || value == null) {
             throw "Invalid arguments";
         }
-
-        value = (typeof value === "object" ? value.format() : value + "");
+  
+        value = (typeof value === "object" ? value.toString() : value + "");
         if (value === "") {
             return null;
         }
-
+  
         let iFormat, dim, extra,
-            iValue = 0,
-            shortYearCutoff = (typeof this.shortYearCutoff !== "string" ? this.shortYearCutoff : moment().jYear() % 100 + parseInt(this.shortYearCutoff, 10)),
-            year = -1,
-            month = -1,
-            day = -1,
-            doy = -1,
-            literal = false,
-            date,
-            lookAhead = (match) => {
-                let matches = (iFormat + 1 < format.length && format.charAt(iFormat + 1) === match);
-                if (matches) {
-                    iFormat++;
+        iValue = 0,
+        shortYearCutoff = (typeof this.shortYearCutoff !== "string" ? this.shortYearCutoff : moment().year() % 100 + parseInt(this.shortYearCutoff, 10)),
+        year = -1,
+        month = -1,
+        day = -1,
+        doy = -1,
+        literal = false,
+        date,
+        lookAhead = (match) => {
+            let matches = (iFormat + 1 < format.length && format.charAt(iFormat + 1) === match);
+            if (matches) {
+                iFormat++;
+            }
+            return matches;
+        },
+        getNumber = (match) => {
+            let isDoubled = lookAhead(match),
+                size = (match === "@" ? 14 : (match === "!" ? 20 :
+                (match === "y" && isDoubled ? 4 : (match === "o" ? 3 : 2)))),
+                minSize = (match === "y" ? size : 1),
+                digits = new RegExp("^\\d{" + minSize + "," + size + "}"),
+                num = value.substring(iValue).match(digits);
+            if (!num) {
+                throw "Missing number at position " + iValue;
+            }
+            iValue += num[ 0 ].length;
+            return parseInt(num[ 0 ], 10);
+        },
+        getName = (match, shortNames, longNames) => {
+            let index = -1;
+            let arr = lookAhead(match) ? longNames : shortNames;
+            let names = [];
+            
+            for (let i = 0; i < arr.length; i++) {
+                names.push([i,arr[i]]);
+            }
+            names.sort((a,b) => {
+                return -(a[ 1 ].length - b[ 1 ].length);
+            });
+            
+            for (let i = 0; i < names.length; i++) {
+                let name = names[i][1];
+                if (value.substr(iValue, name.length).toLowerCase() === name.toLowerCase()) {
+                    index = names[i][0];
+                    iValue += name.length;
+                    break;
                 }
-                return matches;
-            },
-            getNumber = (match) => {
-                let isDoubled = lookAhead(match),
-                    size = (match === "@" ? 14 : (match === "!" ? 20 :
-                        (match === "y" && isDoubled ? 4 : (match === "o" ? 3 : 2)))),
-                    minSize = (match === "y" ? size : 1),
-                    digits = new RegExp("^\\d{" + minSize + "," + size + "}"),
-                    num = value.substring(iValue).match(digits);
-                if (!num) {
-                    throw "Missing number at position " + iValue;
-                }
-                iValue += num[0].length;
-                return parseInt(num[0], 10);
-            },
-            getName = (match, shortNames, longNames) => {
-                let index = -1;
-                let arr = lookAhead(match) ? longNames : shortNames;
-                let names = [];
-
-                for (let i = 0; i < arr.length; i++) {
-                    names.push([i, arr[i]]);
-                }
-                names.sort((a, b) => {
-                    return -(a[1].length - b[1].length);
-                });
-
-                for (let i = 0; i < names.length; i++) {
-                    let name = names[i][1];
-                    if (value.substr(iValue, name.length).toLowerCase() === name.toLowerCase()) {
-                        index = names[i][0];
-                        iValue += name.length;
-                        break;
-                    }
-                }
-
-                if (index !== -1) {
-                    return index + 1;
-                } else {
-                    throw "Unknown name at position " + iValue;
-                }
-            },
-            checkLiteral = () => {
-                if (value.charAt(iValue) !== format.charAt(iFormat)) {
-                    throw "Unexpected literal at position " + iValue;
-                }
-                iValue++;
-            };
-
+            }
+  
+            if (index !== -1) {
+                return index + 1;
+            } else {
+                throw "Unknown name at position " + iValue;
+            }
+        },
+        checkLiteral = () => {
+            if (value.charAt(iValue) !== format.charAt(iFormat)) {
+                throw "Unexpected literal at position " + iValue;
+            }
+            iValue++;
+        };
+  
         if (this.view === 'month') {
             day = 1;
         }
-
+        
         for (iFormat = 0; iFormat < format.length; iFormat++) {
             if (literal) {
                 if (format.charAt(iFormat) === "'" && !lookAhead("'")) {
@@ -1796,15 +1836,15 @@ export class AppComponent implements OnInit, OnDestroy, ControlValueAccessor {
                         break;
                     case "@":
                         date = moment(getNumber("@"));
-                        year = date.jYear();
-                        month = date.jMonth() + 1;
-                        day = date.jDate();
+                        year = date.year();
+                        month = date.month() + 1;
+                        day = date.date();
                         break;
                     case "!":
                         date = moment((getNumber("!") - this.ticksTo1970) / 10000);
-                        year = date.jYear();
-                        month = date.jMonth() + 1;
-                        day = date.jDate();
+                        year = date.year();
+                        month = date.month() + 1;
+                        day = date.date();
                         break;
                     case "'":
                         if (lookAhead("'")) {
@@ -1816,23 +1856,23 @@ export class AppComponent implements OnInit, OnDestroy, ControlValueAccessor {
                     default:
                         checkLiteral();
                 }
-                //  ggggggggggggggg
             }
         }
+  
         if (iValue < value.length) {
             extra = value.substr(iValue);
             if (!/^\s+/.test(extra)) {
                 throw "Extra/unparsed characters found in date: " + extra;
             }
         }
-
+  
         if (year === -1) {
-            year = moment().jYear();
+            year = moment().year();
         } else if (year < 100) {
-            year += moment().jYear() - moment().jYear() % 100 +
+            year += moment().year() - moment().year() % 100 +
                 (year <= shortYearCutoff ? 0 : -100);
         }
-
+  
         if (doy > -1) {
             month = 1;
             day = doy;
@@ -1845,12 +1885,12 @@ export class AppComponent implements OnInit, OnDestroy, ControlValueAccessor {
                 day -= dim;
             } while (true);
         }
-
-        (date) = this.daylightSavingAdjust(format(year, month - 1, day));
-        if (date.jYear() !== year || date.jMonth() + 1 !== month || date.jDate() !== day) {
-            throw "Invalid date"; // E.g. 31/02/00
-        }
-
+  
+        date = this.daylightSavingAdjust(moment([year, month - 1, day]));
+                if (date.year() !== year || date.month() + 1 !== month || date.date() !== day) {
+                    throw "Invalid date"; // E.g. 31/02/00
+                }
+  
         return date;
     }
 
@@ -1870,9 +1910,8 @@ export class AppComponent implements OnInit, OnDestroy, ControlValueAccessor {
     }
 
     onTodayButtonClick(event) {
-        let date: moment.Moment = moment();
+        let date = moment();
         let dateMeta = { day: date.jDate(), month: date.jMonth(), year: date.jYear(), otherMonth: date.jMonth() !== this.currentMonth || date.jYear() !== this.currentYear, today: true, selectable: true };
-
 
         this.onDateSelect(event, dateMeta);
         this.onTodayClick.emit(event);
@@ -1936,6 +1975,7 @@ export class AppComponent implements OnInit, OnDestroy, ControlValueAccessor {
         this.restoreOverlayAppend();
         this.onOverlayHide();
     }
+    
 }
 
  @NgModule({
