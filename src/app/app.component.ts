@@ -207,6 +207,7 @@ export class AppComponent implements OnInit, OnDestroy, ControlValueAccessor {
         dateFormat:'yy/mm/dd'
     };
 
+  
     @Input() tabindex: number;
 
     @ViewChild('inputfield') inputfieldViewChild: ElementRef;
@@ -219,17 +220,22 @@ export class AppComponent implements OnInit, OnDestroy, ControlValueAccessor {
     set utc(_utc: boolean) {
         this._utc = _utc;
         console.log("Setting utc has no effect as built-in UTC support is dropped.");
+        
+
     }
 
+ 
+ 
     value: any;
-
-    dates: any[];
+    selectedDate:Boolean = true;
+    dates: moment.Moment[];
 
     months: any[];
 
     monthPickerValues: any[];
 
     weekDays: string[];
+    status:Boolean = true;
 
     currentMonth: number;
 
@@ -240,7 +246,7 @@ export class AppComponent implements OnInit, OnDestroy, ControlValueAccessor {
     currentMinute: number;
 
     currentSecond: number;
-
+    invalidDates: Array<moment.Moment>
     pm: boolean;
 
     mask: HTMLDivElement;
@@ -273,6 +279,7 @@ export class AppComponent implements OnInit, OnDestroy, ControlValueAccessor {
     isKeydown: boolean;
 
     filled: boolean;
+    rangeDates: moment.Moment[];
 
     inputFieldValue: string = null;
 
@@ -296,7 +303,9 @@ export class AppComponent implements OnInit, OnDestroy, ControlValueAccessor {
 
     focusElement: any;
 
+
     documentResizeListener: any;
+
 
     @Input() get minDate(): moment.Moment {
         return this._minDate;
@@ -354,7 +363,7 @@ export class AppComponent implements OnInit, OnDestroy, ControlValueAccessor {
         this._showTime = showTime;
 
         if (this.currentHour === undefined) {
-            this.initTime(this.value);
+            this.initTime(this.value || moment());
         }
         this.updateInputfield();
     }
@@ -404,6 +413,10 @@ export class AppComponent implements OnInit, OnDestroy, ControlValueAccessor {
         else if (this.view === 'month') {
             this.createMonthPickerValues();
         }
+        let today = moment();
+        let invalidDate = moment();
+        invalidDate.jDate(today.jDate() - 1);
+        this.invalidDates = [today,invalidDate];
     }
 
     ngAfterContentInit() {
@@ -470,6 +483,7 @@ export class AppComponent implements OnInit, OnDestroy, ControlValueAccessor {
         let prevMonthDaysLength =this.getDaysCountInPrevMonth(month, year);
         let sundayIndex = this.getSundayIndex();
         let dayNo = 1;
+        
         let today = moment();
 
         for (let i = 0; i < 6; i++) {
@@ -525,7 +539,7 @@ export class AppComponent implements OnInit, OnDestroy, ControlValueAccessor {
         };
     }
 
-    initTime(date=moment()) {
+    initTime(date : moment.Moment) {
     
         this.pm = date.hour() > 11;
 
@@ -620,11 +634,15 @@ export class AppComponent implements OnInit, OnDestroy, ControlValueAccessor {
             this.populateYearOptions(this.yearOptions[0] + difference, this.yearOptions[this.yearOptions.length - 1] + difference);
         }
     }
+    aa(){
+        alert('in');
+        this.selectedDate = !this.selectedDate;
+        this.status = this.selectedDate ? true : false;
+    }
 
     onDateSelect(event, dateMeta) {
-
-
-
+console.log('clicked day :',dateMeta.day);
+console.log('isSelected : ',this.isSelected(dateMeta));
 
 if (this.disabled || !dateMeta.selectable) {
     event.preventDefault();
@@ -736,17 +754,17 @@ event.preventDefault();
     }
 
     selectDate(dateMeta) {
-  
+
         let date = moment([dateMeta.year, dateMeta.month, dateMeta.day]);
 
         if (this.showTime) {
             if (this.hourFormat === '12' && this.pm && this.currentHour != 12)
-                date.set('hour', this.currentHour + 12);
+                date.hour( this.currentHour + 12);
             else
-                date.set('hour', this.currentHour);
+                date.hour(this.currentHour);
 
-            date.set('minute', this.currentMinute);
-            date.set('second', this.currentSecond);
+            date.minute( this.currentMinute);
+            date.second(this.currentSecond);
         }
 
         if (this.minDate && this.minDate > date) {
@@ -774,7 +792,7 @@ event.preventDefault();
                 let startDate = this.value[0];
                 let endDate = this.value[1];
 
-                if (!endDate && date.format('x') >= startDate.format('x')) {
+                if (!endDate && date.valueOf() >= startDate.valueOf()) {
                     endDate = date;
                 }
                 else {
@@ -814,8 +832,6 @@ event.preventDefault();
 
     getFirstDayOfMonthIndex(month: number, year: number) {
         let day = moment();
-
-
         day.jDate(1);
         day.jMonth(month);
         day.jYear(year);    
@@ -874,7 +890,7 @@ event.preventDefault();
     }
 
     isSelected(dateMeta): boolean {
-
+      
 
         if (this.value) {
             if (this.isSingleSelection()) {
@@ -918,8 +934,8 @@ event.preventDefault();
     isDateBetween(start, end, dateMeta) {
         let between: boolean = false;
         if (start && end) {
-            let date: moment.Moment = (dateMeta.year, dateMeta.month, dateMeta.day);
-            return start.format('x')() <= date.format('x') && end.format('x') >= date.format('x');
+            let date: moment.Moment =moment([dateMeta.year, dateMeta.month, dateMeta.day]);
+            return start.unix() <= date.unix() && end.unix() >= date.unix();
         }
 
         return between;
@@ -1008,8 +1024,8 @@ event.preventDefault();
 
     isDayDisabled(day, month, year): boolean {
         if (this.disabledDays) {
-            let weekday = moment([day, month, year]);
-            let weekdayNumber = weekday.jYear();
+            let weekday = moment([year, month, day]);
+            let weekdayNumber = weekday.jDay();
             return this.disabledDays.indexOf(weekdayNumber) !== -1;
         }
         return false;
@@ -1177,7 +1193,7 @@ event.preventDefault();
         if (this.isMultipleSelection()) {
             value = this.value[this.value.length - 1];
         }
-        let valueDateString = value ? value.toDateString() : null;
+        let valueDateString = value ? value.format() : null;
 
         if (this.minDate && valueDateString && this.minDate.format() === valueDateString) {
             if (this.minDate.hour() > hour) {
@@ -1221,7 +1237,7 @@ event.preventDefault();
         if (this.isMultipleSelection()) {
             value = this.value[this.value.length - 1];
         }
-        let valueDateString = value ? value.toDateString() : null;
+        let valueDateString = value ? value.format() : null;
         if (this.minDate && valueDateString && this.minDate.format() === valueDateString) {
             if (value.hour() == this.minDate.hour()) {
                 if (this.minDate.minute() > minute) {
@@ -1268,7 +1284,7 @@ event.preventDefault();
         if (this.isMultipleSelection()) {
             value = this.value[this.value.length - 1];
         }
-        let valueDateString = value ? value.toDateString() : null;
+        let valueDateString = value ? value.format() : null;
 
         if (this.minDate && valueDateString && this.minDate.format() === valueDateString) {
             if (this.minDate.second() > second) {
@@ -1297,16 +1313,16 @@ event.preventDefault();
 
         if (this.hourFormat == '12') {
             if (this.currentHour === 12)
-                value.setHours(this.pm ? 12 : 0);
+                value.hour(this.pm ? 12 : 0);
             else
-                value.setHours(this.pm ? this.currentHour + 12 : this.currentHour);
+                value.hour(this.pm ? this.currentHour + 12 : this.currentHour);
         }
         else {
-            value.setHours(this.currentHour);
+            value.hour(this.currentHour);
         }
 
-        value.setMinutes(this.currentMinute);
-        value.setSeconds(this.currentSecond);
+        value.minute(this.currentMinute);
+        value.second(this.currentSecond);
         if (this.isRangeSelection()) {
             if (this.value[1])
                 value = [this.value[0], value];
@@ -1383,7 +1399,7 @@ event.preventDefault();
     }
 
     parseDateTime(text): moment.Moment {
-        let date: moment.Moment = moment();
+        let date: moment.Moment;
         let parts: string[] = text.split(' ');
 
         if (this.timeOnly) {
@@ -1410,50 +1426,43 @@ event.preventDefault();
 
         this.pm = (ampm === 'PM' || ampm === 'pm');
         let time = this.parseTime(timeString);
-        value.set(time.hour);
-        value.setMinutes(time.minute);
-        value.setSeconds(time.second);
+        value.hour(time.hour);
+        value.minute(time.minute);
+        value.second(time.second);
     }
 
     updateUI() {
     
-        let val = moment();
-
-
-        if (Array.isArray(val)) {
+        let val = this.value||this.defaultDate||moment();
+        if (Array.isArray(val)){
             val = val[0];
         }
-            this.currentMonth = val.jMonth();
-            this.currentYear = val.jYear();
-            this.createMonths(this.currentMonth, this.currentYear);
-        
+        // this.currentMonth = val.jMonth();
+        // this.currentYear = val.jYear();
 
-          
-    
-            if (this.showTime || this.timeOnly) {
-                let hours = val.hour();
-    
-                if (this.hourFormat == '12') {
-                    this.pm = hours > 11;
-    
-                    if (hours >= 12) {
-                        this.currentHour = (hours == 12) ? 12 : hours - 12;
-                    }
-                    else {
-                        this.currentHour = (hours == 0) ? 12 : hours;
-                    }
+
+        this.createMonths(this.currentMonth, this.currentYear);
+        
+        if (this.showTime||this.timeOnly) {
+            let hours = val.hour();
+            
+            if (this.hourFormat == '12') {
+                this.pm = hours > 11;
+                
+                if (hours >= 12) {
+                    this.currentHour = (hours == 12) ? 12 : hours - 12;
                 }
                 else {
-                    this.currentHour = val.hour();
+                    this.currentHour = (hours == 0) ? 12 : hours;
                 }
-    
-                this.currentMinute = val.minute();
-                this.currentSecond = val.second();
             }
-        
-        
-        
-      
+            else {
+                this.currentHour = val.hour();
+            }
+            
+            this.currentMinute = val.minute();
+            this.currentSecond = val.second();
+        }
     }
 
     onDatePickerClick(event) {
@@ -1587,7 +1596,9 @@ event.preventDefault();
     setDisabledState(val: boolean): void {
         this.disabled = val;
     }
-
+    getDateFormat() {
+        return this.dateFormat || this.locale.dateFormat;
+    }
     // Ported from jquery-ui datepicker formatDate
     formatDate(date, format) {
      
@@ -1650,10 +1661,10 @@ event.preventDefault();
                             output += lookAhead('y') ? date.year() : (date.year() % 100 < 10 ? '0' : '') + (date.year() % 100);
                             break;
                         case '@':
-                            output += date.unix();
+                            output += date.valueOf();
                             break;
                         case '!':
-                            output += date.unix() * 10000 + this.ticksTo1970;
+                            output += date.valueOf() * 10000 + this.ticksTo1970;
                             break;
                         case '\'':
                             if (lookAhead('\'')) {
@@ -1735,14 +1746,14 @@ event.preventDefault();
             throw "Invalid arguments";
         }
   
-        value = (typeof value === "object" ? value.toString() : value + "");
+        value = (typeof value === "object" ? value.format() : value + "");
         if (value === "") {
             return null;
         }
   
         let iFormat, dim, extra,
         iValue = 0,
-        shortYearCutoff = (typeof this.shortYearCutoff !== "string" ? this.shortYearCutoff : moment().year() % 100 + parseInt(this.shortYearCutoff, 10)),
+        shortYearCutoff = (typeof this.shortYearCutoff !== "string" ? this.shortYearCutoff : moment().jYear() % 100 + parseInt(this.shortYearCutoff, 10)),
         year = -1,
         month = -1,
         day = -1,
@@ -1836,15 +1847,15 @@ event.preventDefault();
                         break;
                     case "@":
                         date = moment(getNumber("@"));
-                        year = date.year();
-                        month = date.month() + 1;
-                        day = date.date();
+                        year = date.jYear();
+                        month = date.jMonth() + 1;
+                        day = date.jDate();
                         break;
                     case "!":
                         date = moment((getNumber("!") - this.ticksTo1970) / 10000);
-                        year = date.year();
-                        month = date.month() + 1;
-                        day = date.date();
+                        year = date.jYear();
+                        month = date.jMonth() + 1;
+                        day = date.jDate();
                         break;
                     case "'":
                         if (lookAhead("'")) {
@@ -1867,9 +1878,9 @@ event.preventDefault();
         }
   
         if (year === -1) {
-            year = moment().year();
+            year = moment().jYear();
         } else if (year < 100) {
-            year += moment().year() - moment().year() % 100 +
+            year += moment().jYear() - moment().jYear() % 100 +
                 (year <= shortYearCutoff ? 0 : -100);
         }
   
@@ -1887,7 +1898,7 @@ event.preventDefault();
         }
   
         date = this.daylightSavingAdjust(moment([year, month - 1, day]));
-                if (date.year() !== year || date.month() + 1 !== month || date.date() !== day) {
+                if (date.jYear() !== year || date.jMonth() + 1 !== month || date.jDate() !== day) {
                     throw "Invalid date"; // E.g. 31/02/00
                 }
   
@@ -1910,7 +1921,7 @@ event.preventDefault();
     }
 
     onTodayButtonClick(event) {
-        let date = moment();
+        let date:moment.Moment = moment();
         let dateMeta = { day: date.jDate(), month: date.jMonth(), year: date.jYear(), otherMonth: date.jMonth() !== this.currentMonth || date.jYear() !== this.currentYear, today: true, selectable: true };
 
         this.onDateSelect(event, dateMeta);
@@ -1975,6 +1986,13 @@ event.preventDefault();
         this.restoreOverlayAppend();
         this.onOverlayHide();
     }
+    enableDisableRule(date){
+   
+         console.log(date);
+
+
+
+     }
     
 }
 
