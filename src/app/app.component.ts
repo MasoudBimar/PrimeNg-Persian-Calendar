@@ -207,7 +207,6 @@ export class AppComponent implements OnInit, OnDestroy, ControlValueAccessor {
         dateFormat:'yy/mm/dd'
     };
 
-  
     @Input() tabindex: number;
 
     @ViewChild('inputfield') inputfieldViewChild: ElementRef;
@@ -225,7 +224,7 @@ export class AppComponent implements OnInit, OnDestroy, ControlValueAccessor {
     }
 
  
- 
+    dateMeta:any;
     value: any;
     selectedDate:Boolean = true;
     dates: moment.Moment[];
@@ -413,10 +412,8 @@ export class AppComponent implements OnInit, OnDestroy, ControlValueAccessor {
         else if (this.view === 'month') {
             this.createMonthPickerValues();
         }
-        let today = moment();
-        let invalidDate = moment();
-        invalidDate.jDate(today.jDate() - 1);
-        this.invalidDates = [today,invalidDate];
+
+
     }
 
     ngAfterContentInit() {
@@ -634,15 +631,10 @@ export class AppComponent implements OnInit, OnDestroy, ControlValueAccessor {
             this.populateYearOptions(this.yearOptions[0] + difference, this.yearOptions[this.yearOptions.length - 1] + difference);
         }
     }
-    aa(){
-        alert('in');
-        this.selectedDate = !this.selectedDate;
-        this.status = this.selectedDate ? true : false;
-    }
+
 
     onDateSelect(event, dateMeta) {
-console.log('clicked day :',dateMeta.day);
-console.log('isSelected : ',this.isSelected(dateMeta));
+
 
 if (this.disabled || !dateMeta.selectable) {
     event.preventDefault();
@@ -813,6 +805,7 @@ event.preventDefault();
     updateModel(value) {
         this.value = value;
 
+
         if (this.dataType == 'date') {
             this.onModelChange(this.value);
         }
@@ -926,7 +919,7 @@ event.preventDefault();
 
     isDateEquals(value, dateMeta) {
         if (value)
-            return value.jDate() === dateMeta.day && value.jMonth() === dateMeta.month && value.jYear() === dateMeta.year;
+            return value.date() === dateMeta.day && value.month() === dateMeta.month && value.year() === dateMeta.year;
         else
             return false;
     }
@@ -1347,6 +1340,8 @@ event.preventDefault();
 
     onUserInput(event) {
         // IE 11 Workaround for input placeholder : https://github.com/primefaces/primeng/issues/2026
+
+     
         if (!this.isKeydown) {
             return;
         }
@@ -1433,14 +1428,11 @@ event.preventDefault();
 
     updateUI() {
     
+
         let val = this.value||this.defaultDate||moment();
         if (Array.isArray(val)){
             val = val[0];
         }
-        // this.currentMonth = val.jMonth();
-        // this.currentYear = val.jYear();
-
-
         this.createMonths(this.currentMonth, this.currentYear);
         
         if (this.showTime||this.timeOnly) {
@@ -1921,6 +1913,7 @@ event.preventDefault();
     }
 
     onTodayButtonClick(event) {
+
         let date:moment.Moment = moment();
         let dateMeta = { day: date.jDate(), month: date.jMonth(), year: date.jYear(), otherMonth: date.jMonth() !== this.currentMonth || date.jYear() !== this.currentYear, today: true, selectable: true };
 
@@ -1988,7 +1981,7 @@ event.preventDefault();
     }
     enableDisableRule(date){
    
-         console.log(date);
+   
 
 
 
