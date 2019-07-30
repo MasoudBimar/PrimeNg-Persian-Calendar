@@ -1,0 +1,104 @@
+
+
+<div class="ui-g ui-fluid">
+  <div class="ui-g-12 ui-md-2">
+      <h3>fasle</h3>
+      <primeng-datepicker [isJalali]="false" [(ngModel)]="date2">
+
+      </primeng-datepicker>
+  </div>
+
+  <div class="ui-g-12 ui-md-4">
+    <h3>preset</h3>
+    <primeng-datepicker [(ngModel)]="date" [isJalali]="true">
+
+    </primeng-datepicker>
+</div>
+
+   <div class="ui-g-12 ui-md-4">
+  <h3>Icon</h3>
+  <primeng-datepicker [showIcon]="true" [isJalali]="true" >
+
+  </primeng-datepicker>
+</div>
+<div class="ui-g-12 ui-md-4">
+  <h3>Min-Max</h3>
+  <primeng-datepicker  [minDate]="minDate" [maxDate]="maxDate" [readonlyInput]="true" [isJalali]="true">
+
+  </primeng-datepicker>
+</div>
+<div class="ui-g-12 ui-md-4">
+  <h3>Disable Days</h3>
+  <primeng-datepicker tabindex="0" [disabledDates]="invalidDates" [disabledDays]="[0,6]" [readonlyInput]="true" [isJalali]="true">
+
+  </primeng-datepicker>
+</div>
+<div class="ui-g-12 ui-md-4">
+  <h3>Navigators</h3>
+  <primeng-datepicker [monthNavigator]="true" [yearNavigator]="true" yearRange="1375:1400" [isJalali]="true">
+
+  </primeng-datepicker>
+</div>
+<div class="ui-g-12 ui-md-4">
+  <h3>Time</h3>
+  <primeng-datepicker  [showTime]="true" [isJalali]="true">
+
+  </primeng-datepicker>
+</div>
+<div class="ui-g-12 ui-md-4">
+  <h3>Time Only</h3>
+  <primeng-datepicker [timeOnly]="true" [isJalali]="true">
+
+  </primeng-datepicker>
+</div>
+<div class="ui-g-12 ui-md-4">
+  <h3>Multiple </h3>
+  <primeng-datepicker selectionMode="multiple" [readonlyInput]="true" [isJalali]="true">
+
+  </primeng-datepicker>
+</div>
+<div class="ui-g-12 ui-md-4">
+  <h3>Range</h3>
+  <primeng-datepicker  selectionMode="range" [readonlyInput]="true" [isJalali]="true">
+
+  </primeng-datepicker>
+</div>
+<div class="ui-g-12 ui-md-4">
+  <h3>Button Bar</h3>
+  <primeng-datepicker  showButtonBar="true" [isJalali]="true">
+
+  </primeng-datepicker>
+</div>
+<div class="ui-g-12 ui-md-4">
+  <h3>Date Template</h3>
+  <primeng-datepicker  [isJalali]="true">
+    <ng-template pTemplate="date" let-date>
+      <span [ngStyle]="{backgroundColor: (date.day < 21 && date.day > 10) ? '#81C784' : 'inherit'}" style="border-radius:50%;padding: .25em;width: 1.75em; height:1.75em; display:block;">{{date.day}}</span>
+  </ng-template>
+  </primeng-datepicker>
+</div>
+<div class="ui-g-12 ui-md-4">
+  <h3>Multiple Months</h3>
+  <primeng-datepicker [numberOfMonths]="3" [isJalali]="true">
+
+  </primeng-datepicker>
+</div>
+<div class="ui-g-12 ui-md-4">
+  <h3>Month Picker</h3>
+  <primeng-datepicker view="month" dateFormat="yy/mm" [yearNavigator]="true" yearRange="1375:1425" [isJalali]="true">
+
+  </primeng-datepicker>
+</div>
+<div class="ui-g-12 ui-md-4">
+  <h3>Touch UI</h3>
+  <primeng-datepicker  [touchUI]="true" [isJalali]="true">
+
+  </primeng-datepicker>
+</div>
+<div class="ui-g-12 ui-md-4">
+  <h3>Inline</h3>
+  <primeng-datepicker [inline]="true" [isJalali]="true">
+
+  </primeng-datepicker>
+</div>
+</div>
