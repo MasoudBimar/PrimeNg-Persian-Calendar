@@ -23,7 +23,7 @@
     "@angular/router": "~7.0.0",
     "core-js": "^2.5.4",
     "jalali-moment": "^3.2.3",
-    "moment": "^2.23.0",
+    "moment": "^2.29.2",
     "moment-jalaali": "^0.8.3",
     "primeicons": "^1.0.0",
     "primeng": "^7.0.3",
