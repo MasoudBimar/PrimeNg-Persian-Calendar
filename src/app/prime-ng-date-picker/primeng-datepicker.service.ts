@@ -1,4 +1,6 @@
 import { Injectable } from '@angular/core';
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type ElementType = HTMLElement | any;
 // @dynamic
 @Injectable({
   providedIn: 'root'
@@ -8,90 +10,90 @@ export class PrimengDatepickerService {
   public zindex: number = 1000;
   public static zindex: number = 1000;
 
-  private static calculatedScrollbarWidth: number = null;
+  private static calculatedScrollbarWidth: number | null = null;
 
-  private static calculatedScrollbarHeight: number = null;
+  private static calculatedScrollbarHeight: number | null = null;
 
-  private static browser: any = null;
+  private static browser: any | null = null;
 
-  public static addClass(element: any, className: string): void {
+  public static addClass(element: ElementType, className: string): void {
     if (element.classList)
       element.classList.add(className);
     else
       element.className += ' ' + className;
   }
 
-  public static addMultipleClasses(element: any, className: string): void {
+  public static addMultipleClasses(element: ElementType, className: string): void {
     if (element.classList) {
-      let styles: string[] = className.split(' ');
-      for (let i = 0; i < styles.length; i++) {
-        element.classList.add(styles[i]);
+      const styles: string[] = className.split(' ');
+      for (const style of styles) {
+        element.classList.add(style);
       }
 
     }
     else {
-      let styles: string[] = className.split(' ');
-      for (let i = 0; i < styles.length; i++) {
-        element.className += ' ' + styles[i];
+      const styles: string[] = className.split(' ');
+      for (const style of styles) {
+        element.className += ' ' + style;
       }
     }
   }
 
-  public static removeClass(element: any, className: string): void {
+  public static removeClass(element: ElementType, className: string): void {
     if (element.classList)
       element.classList.remove(className);
     else
       element.className = element.className.replace(new RegExp('(^|\\b)' + className.split(' ').join('|') + '(\\b|$)', 'gi'), ' ');
   }
 
-  public static hasClass(element: any, className: string): boolean {
+  public static hasClass(element: ElementType, className: string): boolean {
     if (element.classList)
       return element.classList.contains(className);
     else
       return new RegExp('(^| )' + className + '( |$)', 'gi').test(element.className);
   }
 
-  public static siblings(element: any) {
+  public static siblings(element: ElementType) {
     return Array.prototype.filter.call(element.parentNode.children, function (child) {
       return child !== element;
     });
   }
 
-  public static find(element: any, selector: string): any[] {
+  public static find(element: ElementType, selector: string): ElementType[] {
     return Array.from(element.querySelectorAll(selector));
   }
 
-  public static findSingle(element: any, selector: string): any {
+  public static findSingle(element: ElementType, selector: string): ElementType {
     return element.querySelector(selector);
   }
 
-  public static index(element: any): number {
-    let children = element.parentNode.childNodes;
+  public static index(element: ElementType): number {
+    const children: ElementType[] = element.parentNode.childNodes;
     let num = 0;
-    for (var i = 0; i < children.length; i++) {
-      if (children[i] == element) return num;
-      if (children[i].nodeType == 1) num++;
+    for (const child of children) {
+      if (child == element) return num;
+      if (child.nodeType == 1) num++;
     }
     return -1;
   }
 
-  public static indexWithinGroup(element: any, attributeName: string): number {
-    let children = element.parentNode.childNodes;
+  public static indexWithinGroup(element: ElementType, attributeName: string): number {
+    const children: any[] = element.parentNode.childNodes;
     let num = 0;
-    for (var i = 0; i < children.length; i++) {
-      if (children[i] == element) return num;
-      if (children[i].attributes && children[i].attributes[attributeName] && children[i].nodeType == 1) num++;
+    for (const child of children) {
+      if (child == element) return num;
+      if (child.attributes && child.attributes[attributeName] && child.nodeType == 1) num++;
     }
     return -1;
   }
 
-  public static relativePosition(element: any, target: any): void {
-    let elementDimensions = element.offsetParent ? { width: element.offsetWidth, height: element.offsetHeight } : this.getHiddenElementDimensions(element);
-    let targetHeight = target.offsetHeight;
-    let targetWidth = target.offsetWidth;
-    let targetOffset = target.getBoundingClientRect();
-    let windowScrollTop = this.getWindowScrollTop();
-    let viewport = this.getViewport();
+  public static relativePosition(element: ElementType, target: any): void {
+    const elementDimensions = element.offsetParent ? { width: element.offsetWidth, height: element.offsetHeight } : this.getHiddenElementDimensions(element);
+    const targetHeight = target.offsetHeight;
+    const targetWidth = target.offsetWidth;
+    const targetOffset = target.getBoundingClientRect();
+    const windowScrollTop = this.getWindowScrollTop();
+    const viewport = this.getViewport();
     let top, left;
 
     if ((targetOffset.top + targetHeight + elementDimensions.height) > viewport.height) {
@@ -114,16 +116,16 @@ export class PrimengDatepickerService {
     element.style.left = left + 'px';
   }
 
-  public static absolutePosition(element: any, target: any): void {
-    let elementDimensions = element.offsetParent ? { width: element.offsetWidth, height: element.offsetHeight } : this.getHiddenElementDimensions(element);
-    let elementOuterHeight = elementDimensions.height;
-    let elementOuterWidth = elementDimensions.width;
-    let targetOuterHeight = target.offsetHeight;
-    let targetOuterWidth = target.offsetWidth;
-    let targetOffset = target.getBoundingClientRect();
-    let windowScrollTop = this.getWindowScrollTop();
-    let windowScrollLeft = this.getWindowScrollLeft();
-    let viewport = this.getViewport();
+  public static absolutePosition(element: ElementType, target: any): void {
+    const elementDimensions = element.offsetParent ? { width: element.offsetWidth, height: element.offsetHeight } : this.getHiddenElementDimensions(element);
+    const elementOuterHeight = elementDimensions.height;
+    const elementOuterWidth = elementDimensions.width;
+    const targetOuterHeight = target.offsetHeight;
+    const targetOuterWidth = target.offsetWidth;
+    const targetOffset = target.getBoundingClientRect();
+    const windowScrollTop = this.getWindowScrollTop();
+    const windowScrollLeft = this.getWindowScrollLeft();
+    const viewport = this.getViewport();
     let top, left;
 
     if (targetOffset.top + targetOuterHeight + elementOuterHeight > viewport.height) {
@@ -145,28 +147,28 @@ export class PrimengDatepickerService {
     element.style.left = left + 'px';
   }
 
-  public static getHiddenElementOuterHeight(element: any): number {
+  public static getHiddenElementOuterHeight(element: ElementType): number {
     element.style.visibility = 'hidden';
     element.style.display = 'block';
-    let elementHeight = element.offsetHeight;
+    const elementHeight = element.offsetHeight;
     element.style.display = 'none';
     element.style.visibility = 'visible';
 
     return elementHeight;
   }
 
-  public static getHiddenElementOuterWidth(element: any): number {
+  public static getHiddenElementOuterWidth(element: ElementType): number {
     element.style.visibility = 'hidden';
     element.style.display = 'block';
-    let elementWidth = element.offsetWidth;
+    const elementWidth = element.offsetWidth;
     element.style.display = 'none';
     element.style.visibility = 'visible';
 
     return elementWidth;
   }
 
-  public static getHiddenElementDimensions(element: any): any {
-    let dimensions: any = {};
+  public static getHiddenElementDimensions(element: ElementType): any {
+    const dimensions: any = {};
     element.style.visibility = 'hidden';
     element.style.display = 'block';
     dimensions.width = element.offsetWidth;
@@ -177,17 +179,17 @@ export class PrimengDatepickerService {
     return dimensions;
   }
 
-  public static scrollInView(container, item) {
-    let borderTopValue: string = getComputedStyle(container).getPropertyValue('borderTopWidth');
-    let borderTop: number = borderTopValue ? parseFloat(borderTopValue) : 0;
-    let paddingTopValue: string = getComputedStyle(container).getPropertyValue('paddingTop');
-    let paddingTop: number = paddingTopValue ? parseFloat(paddingTopValue) : 0;
-    let containerRect = container.getBoundingClientRect();
-    let itemRect = item.getBoundingClientRect();
-    let offset = (itemRect.top + document.body.scrollTop) - (containerRect.top + document.body.scrollTop) - borderTop - paddingTop;
-    let scroll = container.scrollTop;
-    let elementHeight = container.clientHeight;
-    let itemHeight = this.getOuterHeight(item);
+  public static scrollInView(container: any, item: any) {
+    const borderTopValue: string = getComputedStyle(container).getPropertyValue('borderTopWidth');
+    const borderTop: number = borderTopValue ? parseFloat(borderTopValue) : 0;
+    const paddingTopValue: string = getComputedStyle(container).getPropertyValue('paddingTop');
+    const paddingTop: number = paddingTopValue ? parseFloat(paddingTopValue) : 0;
+    const containerRect = container.getBoundingClientRect();
+    const itemRect = item.getBoundingClientRect();
+    const offset = (itemRect.top + document.body.scrollTop) - (containerRect.top + document.body.scrollTop) - borderTop - paddingTop;
+    const scroll = container.scrollTop;
+    const elementHeight = container.clientHeight;
+    const itemHeight = this.getOuterHeight(item);
 
     if (offset < 0) {
       container.scrollTop = scroll + offset;
@@ -197,31 +199,31 @@ export class PrimengDatepickerService {
     }
   }
 
-  public static fadeIn(element, duration: number): void {
+  public static fadeIn(element: ElementType, duration: number): void {
     element.style.opacity = 0;
 
-    let last = +new Date();
+    let last = +Date.now();
     let opacity = 0;
-    let tick = function () {
-      opacity = +element.style.opacity.replace(",", ".") + (new Date().getTime() - last) / duration;
-      element.style.opacity = opacity;
-      last = +new Date();
+    const tick = () => {
+      opacity = parseFloat(element.style.opacity.replace(",", ".")) + (Date.now() - last) / duration;
+      element.style.opacity = opacity.toString();
+      last = +Date.now();
 
       if (+opacity < 1) {
-        (window.requestAnimationFrame && requestAnimationFrame(tick)) || setTimeout(tick, 16);
+        requestAnimationFrame(tick);
       }
     };
 
     tick();
   }
 
-  public static fadeOut(element, ms) {
-    var opacity = 1,
-      interval = 50,
+  public static fadeOut(element: ElementType, ms: number) {
+    let opacity = 1;
+    const interval = 50,
       duration = ms,
       gap = interval / duration;
 
-    let fading = setInterval(() => {
+    const fading = setInterval(() => {
       opacity = opacity - gap;
 
       if (opacity <= 0) {
@@ -234,91 +236,87 @@ export class PrimengDatepickerService {
   }
 
   public static getWindowScrollTop(): number {
-    let doc = document.documentElement;
+    const doc = document.documentElement;
     return (window.pageYOffset || doc.scrollTop) - (doc.clientTop || 0);
   }
 
   public static getWindowScrollLeft(): number {
-    let doc = document.documentElement;
+    const doc = document.documentElement;
     return (window.pageXOffset || doc.scrollLeft) - (doc.clientLeft || 0);
   }
 
-  public static matches(element, selector: string): boolean {
-    var p = Element.prototype;
-    var f = p['matches'] || p.webkitMatchesSelector || p['mozMatchesSelector'] || p['msMatchesSelector'] || function (s) {
-      return [].indexOf.call(document.querySelectorAll(s), this) !== -1;
-    };
-    return f.call(element, selector);
+  public static matches(element: Element, selector: string): boolean {
+    return element.matches(selector);
   }
 
-  public static getOuterWidth(el, margin?) {
+  public static getOuterWidth(el: ElementType, margin?: any) {
     let width = el.offsetWidth;
 
     if (margin) {
-      let style = getComputedStyle(el);
+      const style = getComputedStyle(el);
       width += parseFloat(style.marginLeft) + parseFloat(style.marginRight);
     }
 
     return width;
   }
 
-  public static getHorizontalPadding(el) {
-    let style = getComputedStyle(el);
+  public static getHorizontalPadding(el: ElementType) {
+    const style = getComputedStyle(el);
     return parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
   }
 
-  public static getHorizontalMargin(el) {
-    let style = getComputedStyle(el);
+  public static getHorizontalMargin(el: ElementType) {
+    const style = getComputedStyle(el);
     return parseFloat(style.marginLeft) + parseFloat(style.marginRight);
   }
 
-  public static innerWidth(el) {
+  public static innerWidth(el: ElementType) {
     let width = el.offsetWidth;
-    let style = getComputedStyle(el);
+    const style = getComputedStyle(el);
 
     width += parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
     return width;
   }
 
-  public static width(el) {
+  public static width(el: ElementType) {
     let width = el.offsetWidth;
-    let style = getComputedStyle(el);
+    const style = getComputedStyle(el);
 
     width -= parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
     return width;
   }
 
-  public static getInnerHeight(el) {
+  public static getInnerHeight(el: ElementType) {
     let height = el.offsetHeight;
-    let style = getComputedStyle(el);
+    const style = getComputedStyle(el);
 
     height += parseFloat(style.paddingTop) + parseFloat(style.paddingBottom);
     return height;
   }
 
-  public static getOuterHeight(el, margin?) {
+  public static getOuterHeight(el: ElementType, margin?: any) {
     let height = el.offsetHeight;
 
     if (margin) {
-      let style = getComputedStyle(el);
+      const style = getComputedStyle(el);
       height += parseFloat(style.marginTop) + parseFloat(style.marginBottom);
     }
 
     return height;
   }
 
-  public static getHeight(el): number {
+  public static getHeight(el: ElementType): number {
     let height = el.offsetHeight;
-    let style = getComputedStyle(el);
+    const style = getComputedStyle(el);
 
     height -= parseFloat(style.paddingTop) + parseFloat(style.paddingBottom) + parseFloat(style.borderTopWidth) + parseFloat(style.borderBottomWidth);
 
     return height;
   }
 
-  public static getWidth(el): number {
+  public static getWidth(el: ElementType): number {
     let width = el.offsetWidth;
-    let style = getComputedStyle(el);
+    const style = getComputedStyle(el);
 
     width -= parseFloat(style.paddingLeft) + parseFloat(style.paddingRight) + parseFloat(style.borderLeftWidth) + parseFloat(style.borderRightWidth);
 
@@ -326,7 +324,7 @@ export class PrimengDatepickerService {
   }
 
   public static getViewport(): any {
-    let win = window,
+    const win = window,
       d = document,
       e = d.documentElement,
       g = d.getElementsByTagName('body')[0],
@@ -336,8 +334,8 @@ export class PrimengDatepickerService {
     return { width: w, height: h };
   }
 
-  public static getOffset(el) {
-    let rect = el.getBoundingClientRect();
+  public static getOffset(el: ElementType) {
+    const rect = el.getBoundingClientRect();
 
     return {
       top: rect.top + document.body.scrollTop,
@@ -345,8 +343,8 @@ export class PrimengDatepickerService {
     };
   }
 
-  public static replaceElementWith(element: any, replacementElement: any): any {
-    let parentNode = element.parentNode;
+  public static replaceElementWith(element: ElementType, replacementElement: ElementType): any {
+    const parentNode = element.parentNode;
     if (!parentNode)
       throw `Can't replace element`;
     return parentNode.replaceChild(replacementElement, element);
@@ -357,22 +355,22 @@ export class PrimengDatepickerService {
   }
 
   public static isIE() {
-    var ua = window.navigator.userAgent;
+    const ua = window.navigator.userAgent;
 
-    var msie = ua.indexOf('MSIE ');
+    const msie = ua.indexOf('MSIE ');
     if (msie > 0) {
       // IE 10 or older => return version number
       return true;
     }
 
-    var trident = ua.indexOf('Trident/');
+    const trident = ua.indexOf('Trident/');
     if (trident > 0) {
       // IE 11 => return version number
-      var rv = ua.indexOf('rv:');
+      const rv = ua.indexOf('rv:');
       return true;
     }
 
-    var edge = ua.indexOf('Edge/');
+    const edge = ua.indexOf('Edge/');
     if (edge > 0) {
       // Edge (IE 12+) => return version number
       return true;
@@ -382,7 +380,7 @@ export class PrimengDatepickerService {
     return false;
   }
 
-  public static appendChild(element: any, target: any) {
+  public static appendChild(element: ElementType, target: any) {
     if (this.isElement(target))
       target.appendChild(element);
     else if (target.el && target.el.nativeElement)
@@ -391,7 +389,7 @@ export class PrimengDatepickerService {
       throw 'Cannot append ' + target + ' to ' + element;
   }
 
-  public static removeChild(element: any, target: any) {
+  public static removeChild(element: ElementType, target: any) {
     if (this.isElement(target))
       target.removeChild(element);
     else if (target.el && target.el.nativeElement)
@@ -410,11 +408,11 @@ export class PrimengDatepickerService {
     if (this.calculatedScrollbarWidth !== null)
       return this.calculatedScrollbarWidth;
 
-    let scrollDiv = document.createElement("div");
+    const scrollDiv = document.createElement("div");
     scrollDiv.className = "ui-scrollbar-measure";
     document.body.appendChild(scrollDiv);
 
-    let scrollbarWidth = scrollDiv.offsetWidth - scrollDiv.clientWidth;
+    const scrollbarWidth = scrollDiv.offsetWidth - scrollDiv.clientWidth;
     document.body.removeChild(scrollDiv);
 
     this.calculatedScrollbarWidth = scrollbarWidth;
@@ -426,11 +424,11 @@ export class PrimengDatepickerService {
     if (this.calculatedScrollbarHeight !== null)
       return this.calculatedScrollbarHeight;
 
-    let scrollDiv = document.createElement("div");
+    const scrollDiv = document.createElement("div");
     scrollDiv.className = "ui-scrollbar-measure";
     document.body.appendChild(scrollDiv);
 
-    let scrollbarHeight = scrollDiv.offsetHeight - scrollDiv.clientHeight;
+    const scrollbarHeight = scrollDiv.offsetHeight - scrollDiv.clientHeight;
     document.body.removeChild(scrollDiv);
 
     this.calculatedScrollbarWidth = scrollbarHeight;
@@ -438,30 +436,24 @@ export class PrimengDatepickerService {
     return scrollbarHeight;
   }
 
-  public static invokeElementMethod(element: any, methodName: string, args?: any[]): void {
-    (element as any)[methodName].apply(element, args);
+  public static invokeElementMethod(element: ElementType, methodName: string, args?: any[]): void {
+    element[methodName].apply(element, args);
   }
 
   public static clearSelection(): void {
-    if (window.getSelection) {
-      if (window.getSelection().empty) {
-        window.getSelection().empty();
-      } else if (window.getSelection().removeAllRanges && window.getSelection().rangeCount > 0 && window.getSelection().getRangeAt(0).getClientRects().length > 0) {
-        window.getSelection().removeAllRanges();
-      }
-    }
-    else if (document['selection'] && document['selection'].empty) {
-      try {
-        document['selection'].empty();
-      } catch (error) {
-        //ignore IE bug
+    const selection: Selection | null = window.getSelection?.();
+    if (selection) {
+      if (selection.empty) {
+        selection.empty();
+      } else if (selection.removeAllRanges && selection.rangeCount > 0 && selection.getRangeAt(0).getClientRects().length > 0) {
+        selection.removeAllRanges();
       }
     }
   }
 
   public static getBrowser() {
     if (!this.browser) {
-      let matched = this.resolveUserAgent();
+      const matched = this.resolveUserAgent();
       this.browser = {};
 
       if (matched.browser) {
@@ -480,8 +472,8 @@ export class PrimengDatepickerService {
   }
 
   public static resolveUserAgent() {
-    let ua = navigator.userAgent.toLowerCase();
-    let match = /(chrome)[ \/]([\w.]+)/.exec(ua) ||
+    const ua = navigator.userAgent.toLowerCase();
+    const match = /(chrome)[ \/]([\w.]+)/.exec(ua) ||
       /(webkit)[ \/]([\w.]+)/.exec(ua) ||
       /(opera)(?:.*version|)[ \/]([\w.]+)/.exec(ua) ||
       /(msie) ([\w.]+)/.exec(ua) ||
@@ -494,7 +486,7 @@ export class PrimengDatepickerService {
     };
   }
 
-  public static isInteger(value): boolean {
+  public static isInteger(value: unknown): boolean {
     if (Number.isInteger) {
       return Number.isInteger(value);
     }

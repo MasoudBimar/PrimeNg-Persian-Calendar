@@ -1,6 +1,5 @@
-import { NgModule, EventEmitter, Directive, ViewContainerRef, Input, Output, ContentChildren, ContentChild, TemplateRef, OnInit, OnChanges, OnDestroy, AfterContentInit, QueryList, SimpleChanges, EmbeddedViewRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { AfterContentInit, Component, contentChild, contentChildren, Directive, inject, input, NgModule, output, TemplateRef } from '@angular/core';
 // @dynamic
 @Component({
   selector: 'pp-header',
@@ -22,14 +21,15 @@ export class Footer { }
 })
 export class PrimeTemplate {
 
-  @Input() type: string;
+  public template = inject(TemplateRef<any>);
 
-  @Input('pTemplate') name: string;
+  type = input<string>();
 
-  constructor(public template: TemplateRef<any>) { }
+  name = input<string>('', { alias: 'pTemplate' });
+
 
   getType(): string {
-    return this.name;
+    return this.name();
   }
 }
 // @dynamic
@@ -39,49 +39,49 @@ export class PrimeTemplate {
   template: ''
 })
 export class Column implements AfterContentInit {
-  @Input() field: string;
-  @Input() colId: string;
-  @Input() sortField: string;
-  @Input() filterField: string;
-  @Input() header: string;
-  @Input() footer: string;
-  @Input() sortable: any;
-  @Input() editable: boolean;
-  @Input() filter: boolean;
-  @Input() filterMatchMode: string;
-  @Input() filterType: string = 'text';
-  @Input() excludeGlobalFilter: boolean;
-  @Input() rowspan: number;
-  @Input() colspan: number;
-  @Input() scope: string;
-  @Input() style: any;
-  @Input() styleClass: string;
-  @Input() exportable: boolean = true;
-  @Input() headerStyle: any;
-  @Input() headerStyleClass: string;
-  @Input() bodyStyle: any;
-  @Input() bodyStyleClass: string;
-  @Input() footerStyle: any;
-  @Input() footerStyleClass: string;
-  @Input() hidden: boolean;
-  @Input() expander: boolean;
-  @Input() selectionMode: string;
-  @Input() filterPlaceholder: string;
-  @Input() filterMaxlength: number;
-  @Input() frozen: boolean;
-  @Input() resizable: boolean = true;
-  @Output() sortFunction: EventEmitter<any> = new EventEmitter();
-  @ContentChildren(PrimeTemplate) templates: QueryList<any>;
-  @ContentChild(TemplateRef) template: TemplateRef<any>;
+  field = input<string>();
+  colId = input<string>();
+  sortField = input<string>();
+  filterField = input<string>();
+  header = input<string>();
+  footer = input<string>();
+  sortable = input<boolean>();
+  editable = input<boolean>();
+  filter = input<boolean>();
+  filterMatchMode = input<string>();
+  filterType = input<string>('text');
+  excludeGlobalFilter = input<boolean>();
+  rowspan = input<number>();
+  colspan = input<number>();
+  scope = input<string>();
+  style = input<string>();
+  styleClass = input<string>();
+  exportable = input<boolean>(true);
+  headerStyle = input<string>();
+  headerStyleClass = input<string>();
+  bodyStyle = input<string>();
+  bodyStyleClass = input<string>();
+  footerStyle = input<string>();
+  footerStyleClass = input<string>();
+  hidden = input<boolean>();
+  expander = input<boolean>();
+  selectionMode = input<string>();
+  filterPlaceholder = input<string>();
+  filterMaxlength = input<number>();
+  frozen = input<boolean>();
+  resizable = input<boolean>(true);
+  sortFunction = output<() => void>();
+  templates = contentChildren(PrimeTemplate);
+  template = contentChild(TemplateRef);
 
-  public headerTemplate: TemplateRef<any>;
-  public bodyTemplate: TemplateRef<any>;
-  public footerTemplate: TemplateRef<any>;
-  public filterTemplate: TemplateRef<any>;
-  public editorTemplate: TemplateRef<any>;
+  public headerTemplate?: TemplateRef<PrimeTemplate>;
+  public bodyTemplate?: TemplateRef<PrimeTemplate>;
+  public footerTemplate?: TemplateRef<PrimeTemplate>;
+  public filterTemplate?: TemplateRef<PrimeTemplate>;
+  public editorTemplate?: TemplateRef<PrimeTemplate>;
 
   ngAfterContentInit(): void {
-    this.templates.forEach((item) => {
+    this.templates().forEach((item) => {
       switch (item.getType()) {
         case 'header':
           this.headerTemplate = item.template;
@@ -118,7 +118,7 @@ export class Column implements AfterContentInit {
 })
 export class Row {
 
-  @ContentChildren(Column) columns: QueryList<Column>;
+  columns = contentChildren(Column);
 
 }
 // @dynamic
@@ -129,9 +129,9 @@ export class Row {
 })
 export class HeaderColumnGroup {
 
-  @Input() frozen: boolean;
+  frozen = input<boolean>();
 
-  @ContentChildren(Row) rows: QueryList<any>;
+  rows = contentChildren(Row);
 }
 // @dynamic
 /* Deprecated */
@@ -141,14 +141,64 @@ export class HeaderColumnGroup {
 })
 export class FooterColumnGroup {
 
-  @Input() frozen: boolean;
+  frozen = input<boolean>();
 
-  @ContentChildren(Row) rows: QueryList<any>;
+  rows = contentChildren(Row);
 }
 
 @NgModule({
-  imports: [CommonModule],
-  exports: [Header, Footer, Column, PrimeTemplate, Row, HeaderColumnGroup, FooterColumnGroup],
-  declarations: [Header, Footer, Column, PrimeTemplate, Row, HeaderColumnGroup, FooterColumnGroup]
+  imports: [CommonModule, Header, Footer, Column, PrimeTemplate, Row, HeaderColumnGroup, FooterColumnGroup],
+  exports: [Header, Footer, Column, PrimeTemplate, Row, HeaderColumnGroup, FooterColumnGroup]
 })
 export class SharedModule { }
+
+
+export function addStyle(element: HTMLElement, style: string | object): void {
+  if (element) {
+    if (typeof style === 'string') {
+      element.style.cssText = style;
+    } else {
+      Object.entries(style || {}).forEach(([key, value]: [string, string]) => ((element.style as any)[key] = value));
+    }
+  }
+}
+
+
+export function getIndex(element: HTMLElement): number {
+  if (element) {
+    const children = getParentNode(element)?.childNodes;
+    let num = 0;
+
+    if (children) {
+      for (const child of children) {
+        if (child === element) return num;
+        if (child.nodeType === 1) num++;
+      }
+    }
+  }
+
+  return -1;
+}
+
+export function getParentNode(element: Node): ParentNode | null {
+  if (element) {
+    let parent = element.parentNode;
+
+    if (parent && parent instanceof ShadowRoot && parent.host) {
+      parent = parent.host;
+    }
+
+    return parent;
+  }
+
+  return null;
+}
+
+export function hasClass(element: Element, className: string): boolean {
+  if (element) {
+    if (element.classList) return element.classList.contains(className);
+    else return new RegExp('(^| )' + className + '( |$)', 'gi').test(element.className);
+  }
+
+  return false;
+}

@@ -1,0 +1,121 @@
+<div class="ui-g ui-fluid">
+  <div class="ui-g-12 ui-md-2">
+    <h3>fasle</h3>
+    <div class="card flex justify-center">
+      <persian-datepicker [isJalali]="false" [(ngModel)]="date2"> </persian-datepicker
+    </div>
+  </div>
+
+  <div class="ui-g-12 ui-md-4">
+    <h3>preset</h3>
+    <persian-datepicker [(ngModel)]="date" [isJalali]="true"> </persian-datepicker
+  </div>
+
+  <div class="ui-g-12 ui-md-4">
+    <h3>Icon</h3>
+    <persian-datepicker [showIcon]="true" [isJalali]="true"> </persian-datepicker
+  </div>
+  <div class="ui-g-12 ui-md-4">
+    <h3>Min-Max</h3>
+    <persian-datepicker
+      class="p-datepicker"
+      [(ngModel)]="date"
+      [minDate]="minDate.toDate()"
+      [maxDate]="maxDate.toDate()"
+      [readonlyInput]="true"
+      [isJalali]="true"
+    >
+    </persian-datepicker
+  </div>
+  <div class="ui-g-12 ui-md-4">
+    <h3>Disable Days</h3>
+    <persian-datepicker
+      class="p-datepicker"
+      [disabledDates]="invalidDates"
+      [disabledDays]="[0, 6]"
+      [readonlyInput]="true"
+      [isJalali]="true"
+    >
+    </persian-datepicker
+  </div>
+  <div class="ui-g-12 ui-md-4">
+    <h3>Navigators</h3>
+    <persian-datepicker
+      class="p-datepicker"
+      class="p-datepicker"
+      [monthNavigator]="true"
+      [yearNavigator]="true"
+      yearRange="1375:1400"
+      [isJalali]="true"
+    >
+    </persian-datepicker
+  </div>
+  <div class="ui-g-12 ui-md-4">
+    <h3>Time</h3>
+    <persian-datepicker class="p-datepicker" [showTime]="true" [isJalali]="true"> </persian-datepicker
+  </div>
+  <div class="ui-g-12 ui-md-4">
+    <h3>Time Only</h3>
+    <persian-datepicker class="p-datepicker" [timeOnly]="true" [isJalali]="true"> </persian-datepicker
+  </div>
+  <div class="ui-g-12 ui-md-4">
+    <h3>Multiple</h3>
+    <persian-datepicker
+      class="p-datepicker"
+      selectionMode="multiple"
+      [readonlyInput]="true"
+      [isJalali]="true"
+    >
+    </persian-datepicker
+  </div>
+  <div class="ui-g-12 ui-md-4">
+    <h3>Range</h3>
+    <persian-datepicker
+      class="p-datepicker"
+      selectionMode="range"
+      [readonlyInput]="true"
+      [isJalali]="true"
+    >
+    </persian-datepicker
+  </div>
+  <div class="ui-g-12 ui-md-4">
+    <h3>Button Bar</h3>
+    <persian-datepicker class="p-datepicker" [showButtonBar]="true" [isJalali]="true"> </persian-datepicker
+  </div>
+  <div class="ui-g-12 ui-md-4">
+    <h3>Date Template</h3>
+    <persian-datepicker class="p-datepicker" [isJalali]="true">
+      <ng-template pTemplate="date" let-date>
+        <span
+          [style]="{ backgroundColor: date.day < 21 && date.day > 10 ? '#81C784' : 'inherit' }"
+          style="border-radius: 50%; padding: 0.25em; width: 1.75em; height: 1.75em; display: block"
+          >{{ date.day }}</span
+        >
+      </ng-template>
+    </persian-datepicker
+  </div>
+  <div class="ui-g-12 ui-md-4">
+    <h3>Multiple Months</h3>
+    <persian-datepicker class="p-datepicker" [numberOfMonths]="3" [isJalali]="true"> </persian-datepicker
+  </div>
+  <div class="ui-g-12 ui-md-4">
+    <h3>Month Picker</h3>
+    <persian-datepicker
+      class="p-datepicker"
+      view="month"
+      dateFormat="yy/mm"
+      [yearNavigator]="true"
+      yearRange="1375:1425"
+      [isJalali]="true"
+    >
+    </persian-datepicker
+  </div>
+  <div class="ui-g-12 ui-md-4">
+    <h3>Touch UI</h3>
+    <persian-datepicker class="p-datepicker" [touchUI]="true" [isJalali]="true"> </persian-datepicker
+  </div>
+  <div class="ui-g-12 ui-md-4">
+    <h3>Inline</h3>
+    <persian-datepicker class="p-datepicker" [inline]="true" [isJalali]="true"> </persian-datepicker
+  </div>
+</div>

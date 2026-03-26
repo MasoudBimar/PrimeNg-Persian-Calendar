@@ -37,7 +37,7 @@ export interface LocaleSettings {
 }
 
 @Component({
-  selector: 'primeng-datepicker',
+  selector: '</p-datepicker>',
   templateUrl: './primeng-datepicker.component.html',
   styles: [],
   animations: [
@@ -793,7 +793,7 @@ export class PrimengDatepickerComponent implements OnInit, OnDestroy, ControlVal
   selectDate(dateMeta) {
 
     // let date = moment([dateMeta.year, dateMeta.month, dateMeta.day]);
-    let date = moment(dateMeta.year + '-' + (dateMeta.month+1) + '-' + dateMeta.day, 'jYYYY-jM-jD').locale('fa');
+    let date = moment(dateMeta.year + '-' + (dateMeta.month + 1) + '-' + dateMeta.day, 'jYYYY-jM-jD').locale('fa');
     if (this.showTime) {
       if (this.hourFormat === '12' && this.pm && this.currentHour != 12)
         date.hour(this.currentHour + 12);
@@ -977,10 +977,10 @@ export class PrimengDatepickerComponent implements OnInit, OnDestroy, ControlVal
   }
 
   isMonthSelected(month: number): boolean {
-    if(this.calendarType)
-    return this.value ? (this.value.jMonth() === month && this.value.jYear() === this.currentYear) : false;
+    if (this.calendarType)
+      return this.value ? (this.value.jMonth() === month && this.value.jYear() === this.currentYear) : false;
     else
-    return this.value ? (this.value.month() === month && this.value.year() === this.currentYear) : false;
+      return this.value ? (this.value.month() === month && this.value.year() === this.currentYear) : false;
 
   }
 
@@ -1015,10 +1015,10 @@ export class PrimengDatepickerComponent implements OnInit, OnDestroy, ControlVal
   }
 
   isToday(today, day, month, year): boolean {
-    if(this.calendarType)
-    return today.jDate() === day && today.jMonth() === month && today.jYear() === year;
+    if (this.calendarType)
+      return today.jDate() === day && today.jMonth() === month && today.jYear() === year;
     else
-    return today.date() === day && today.month() === month && today.year() === year;
+      return today.date() === day && today.month() === month && today.year() === year;
   }
 
   isSelectable(day, month, year, otherMonth): boolean {
@@ -1028,85 +1028,85 @@ export class PrimengDatepickerComponent implements OnInit, OnDestroy, ControlVal
     let validDay = true;
 
     if (otherMonth && !this.selectOtherMonths) {
-        return false;
+      return false;
     }
 
     if (this.minDate) {
-if(this.calendarType){
-    if (this.minDate.jYear() > year) {
-        validMin = false;
-    }
-    else if (this.minDate.jYear() === year) {
-        if (this.minDate.jMonth() > month) {
-            validMin = false;
+      if (this.calendarType) {
+        if (this.minDate.jYear() > year) {
+          validMin = false;
         }
-        else if (this.minDate.jMonth() === month) {
+        else if (this.minDate.jYear() === year) {
+          if (this.minDate.jMonth() > month) {
+            validMin = false;
+          }
+          else if (this.minDate.jMonth() === month) {
             if (this.minDate.jDate() > day) {
-                validMin = false;
+              validMin = false;
             }
+          }
         }
-    }
-}
-else{
-    if (this.minDate.year() > year) {
-        validMin = false;
-    }
-    else if (this.minDate.year() === year) {
-        if (this.minDate.month() > month) {
+      }
+      else {
+        if (this.minDate.year() > year) {
+          validMin = false;
+        }
+        else if (this.minDate.year() === year) {
+          if (this.minDate.month() > month) {
             validMin = false;
-        }
-        else if (this.minDate.month() === month) {
+          }
+          else if (this.minDate.month() === month) {
             if (this.minDate.date() > day) {
-                validMin = false;
+              validMin = false;
             }
+          }
         }
-    }
-}
+      }
 
     }
 
     if (this.maxDate) {
-        if(this.calendarType){
-            if (this.maxDate.jYear() < year) {
+      if (this.calendarType) {
+        if (this.maxDate.jYear() < year) {
+          validMax = false;
+        }
+        else if (this.maxDate.jYear() === year) {
+          if (this.maxDate.jMonth() < month) {
+            validMax = false;
+          }
+          else if (this.maxDate.jMonth() === month) {
+            if (this.maxDate.jDate() < day) {
+              validMax = false;
+            }
+          }
+        }
+      }
+      else {
+        if (this.calendarType) {
+          if (this.maxDate.year() < year) {
+            validMax = false;
+          }
+          else if (this.maxDate.year() === year) {
+            if (this.maxDate.month() < month) {
+              validMax = false;
+            }
+            else if (this.maxDate.month() === month) {
+              if (this.maxDate.date() < day) {
                 validMax = false;
+              }
             }
-            else if (this.maxDate.jYear() === year) {
-                if (this.maxDate.jMonth() < month) {
-                    validMax = false;
-                }
-                else if (this.maxDate.jMonth() === month) {
-                    if (this.maxDate.jDate() < day) {
-                        validMax = false;
-                    }
-                }
-            }
+          }
         }
-        else{
-            if(this.calendarType){
-                if (this.maxDate.year() < year) {
-                    validMax = false;
-                }
-                else if (this.maxDate.year() === year) {
-                    if (this.maxDate.month() < month) {
-                        validMax = false;
-                    }
-                    else if (this.maxDate.month() === month) {
-                        if (this.maxDate.date() < day) {
-                            validMax = false;
-                        }
-                    }
-                }
-            }
-        }
+      }
 
     }
 
     if (this.disabledDates) {
-        validDate = !this.isDateDisabled(day, month, year);
+      validDate = !this.isDateDisabled(day, month, year);
     }
 
     if (this.disabledDays) {
-        validDay = !this.isDayDisabled(day, month, year)
+      validDay = !this.isDayDisabled(day, month, year)
     }
 
     return validMin && validMax && validDate && validDay;
@@ -1115,38 +1115,38 @@ else{
   isDateDisabled(day: number, month: number, year: number): boolean {
     if (this.disabledDates) {
       for (let disabledDate of this.disabledDates) {
-          if(this.calendarType){
-              if (disabledDate.jYear() === year && disabledDate.jMonth() === month && disabledDate.jDate() === day) {
-                  return true;
-              }
+        if (this.calendarType) {
+          if (disabledDate.jYear() === year && disabledDate.jMonth() === month && disabledDate.jDate() === day) {
+            return true;
           }
-          else{
-              if (disabledDate.year() === year && disabledDate.month() === month && disabledDate.date() === day) {
-                  return true;
-              }
+        }
+        else {
+          if (disabledDate.year() === year && disabledDate.month() === month && disabledDate.date() === day) {
+            return true;
           }
+        }
 
       }
-  }
+    }
 
-  return false;
+    return false;
   }
 
   isDayDisabled(day, month, year): boolean {
     if (this.disabledDays) {
       let weekday = moment([year, month, day]);
-      if(this.calendarType){
-          let weekdayNumber = weekday.jDay();
-          return this.disabledDays.indexOf(weekdayNumber) !== -1;
+      if (this.calendarType) {
+        let weekdayNumber = weekday.jDay();
+        return this.disabledDays.indexOf(weekdayNumber) !== -1;
       }
-      else{
-          let weekdayNumber = weekday.day();
-          return this.disabledDays.indexOf(weekdayNumber) !== -1;
+      else {
+        let weekdayNumber = weekday.day();
+        return this.disabledDays.indexOf(weekdayNumber) !== -1;
       }
 
 
-  }
-  return false;
+    }
+    return false;
   }
 
   onInputFocus(event: Event) {
@@ -1469,35 +1469,35 @@ else{
 
     if (!this.isKeydown) {
       return;
-  }
-  this.isKeydown = false;
+    }
+    this.isKeydown = false;
 
-  let val = event.target.value;
-  try {
+    let val = event.target.value;
+    try {
       let value = this.parseValueFromString(val);
-      if(this.calendarType){
-          if (this.isSelectable(value.jDate(), value.jMonth(), value.jYear(), false)) {
-              this.updateModel(value);
-              this.updateUI();
+      if (this.calendarType) {
+        if (this.isSelectable(value.jDate(), value.jMonth(), value.jYear(), false)) {
+          this.updateModel(value);
+          this.updateUI();
 
-          }
+        }
       }
-      else{
-          if (this.isSelectable(value.date(), value.month(), value.year(), false)) {
-              this.updateModel(value);
-              this.updateUI();
+      else {
+        if (this.isSelectable(value.date(), value.month(), value.year(), false)) {
+          this.updateModel(value);
+          this.updateUI();
 
-          }
+        }
       }
 
-  }
-  catch (err) {
+    }
+    catch (err) {
       //invalid date
       this.updateModel(null);
-  }
+    }
 
-  this.filled = val != null && val.length;
-  this.onInput.emit(event);
+    this.filled = val != null && val.length;
+    this.onInput.emit(event);
   }
 
   parseValueFromString(text: string): moment.Moment {
@@ -1873,193 +1873,193 @@ else{
   parseDate(value, format) {
     if (format == null || value == null) {
       throw "Invalid arguments";
-  }
+    }
 
-  value = (typeof value === "object" ? value.format() : value + "");
-  if (value === "") {
+    value = (typeof value === "object" ? value.format() : value + "");
+    if (value === "") {
       return null;
-  }
+    }
 
-  let iFormat, dim, extra,
-  iValue = 0,
-  shortYearCutoff = (typeof this.shortYearCutoff !== "string" ? this.shortYearCutoff : moment().jYear() % 100 + parseInt(this.shortYearCutoff, 10)),
-  year = -1,
-  month = -1,
-  day = -1,
-  doy = -1,
-  literal = false,
-  date,
-  lookAhead = (match) => {
-      let matches = (iFormat + 1 < format.length && format.charAt(iFormat + 1) === match);
-      if (matches) {
+    let iFormat, dim, extra,
+      iValue = 0,
+      shortYearCutoff = (typeof this.shortYearCutoff !== "string" ? this.shortYearCutoff : moment().jYear() % 100 + parseInt(this.shortYearCutoff, 10)),
+      year = -1,
+      month = -1,
+      day = -1,
+      doy = -1,
+      literal = false,
+      date,
+      lookAhead = (match) => {
+        let matches = (iFormat + 1 < format.length && format.charAt(iFormat + 1) === match);
+        if (matches) {
           iFormat++;
-      }
-      return matches;
-  },
-  getNumber = (match) => {
-      let isDoubled = lookAhead(match),
+        }
+        return matches;
+      },
+      getNumber = (match) => {
+        let isDoubled = lookAhead(match),
           size = (match === "@" ? 14 : (match === "!" ? 20 :
-          (match === "y" && isDoubled ? 4 : (match === "o" ? 3 : 2)))),
+            (match === "y" && isDoubled ? 4 : (match === "o" ? 3 : 2)))),
           minSize = (match === "y" ? size : 1),
           digits = new RegExp("^\\d{" + minSize + "," + size + "}"),
           num = value.substring(iValue).match(digits);
-      if (!num) {
+        if (!num) {
           throw "Missing number at position " + iValue;
-      }
-      iValue += num[ 0 ].length;
-      return parseInt(num[ 0 ], 10);
-  },
-  getName = (match, shortNames, longNames) => {
-      let index = -1;
-      let arr = lookAhead(match) ? longNames : shortNames;
-      let names = [];
+        }
+        iValue += num[0].length;
+        return parseInt(num[0], 10);
+      },
+      getName = (match, shortNames, longNames) => {
+        let index = -1;
+        let arr = lookAhead(match) ? longNames : shortNames;
+        let names = [];
 
-      for (let i = 0; i < arr.length; i++) {
-          names.push([i,arr[i]]);
-      }
-      names.sort((a,b) => {
-          return -(a[ 1 ].length - b[ 1 ].length);
-      });
+        for (let i = 0; i < arr.length; i++) {
+          names.push([i, arr[i]]);
+        }
+        names.sort((a, b) => {
+          return -(a[1].length - b[1].length);
+        });
 
-      for (let i = 0; i < names.length; i++) {
+        for (let i = 0; i < names.length; i++) {
           let name = names[i][1];
           if (value.substr(iValue, name.length).toLowerCase() === name.toLowerCase()) {
-              index = names[i][0];
-              iValue += name.length;
-              break;
+            index = names[i][0];
+            iValue += name.length;
+            break;
           }
-      }
+        }
 
-      if (index !== -1) {
+        if (index !== -1) {
           return index + 1;
-      } else {
+        } else {
           throw "Unknown name at position " + iValue;
-      }
-  },
-  checkLiteral = () => {
-      if (value.charAt(iValue) !== format.charAt(iFormat)) {
+        }
+      },
+      checkLiteral = () => {
+        if (value.charAt(iValue) !== format.charAt(iFormat)) {
           throw "Unexpected literal at position " + iValue;
-      }
-      iValue++;
-  };
+        }
+        iValue++;
+      };
 
-  if (this.view === 'month') {
+    if (this.view === 'month') {
       day = 1;
-  }
+    }
 
-  for (iFormat = 0; iFormat < format.length; iFormat++) {
+    for (iFormat = 0; iFormat < format.length; iFormat++) {
       if (literal) {
-          if (format.charAt(iFormat) === "'" && !lookAhead("'")) {
-              literal = false;
-          } else {
-              checkLiteral();
-          }
+        if (format.charAt(iFormat) === "'" && !lookAhead("'")) {
+          literal = false;
+        } else {
+          checkLiteral();
+        }
       } else {
-          switch (format.charAt(iFormat)) {
-              case "d":
-                  day = getNumber("d");
-                  break;
-              case "D":
-                  getName("D", this.locale.dayNamesShort, this.locale.dayNames);
-                  break;
-              case "o":
-                  doy = getNumber("o");
-                  break;
-              case "m":
-                  month = getNumber("m");
-                  break;
-              case "M":
-                  month = getName("M", this.locale.monthNamesShort, this.locale.monthNames);
-                  break;
-              case "y":
-                  year = getNumber("y");
-                  break;
-              case "@":
-                  date = moment(getNumber("@"));
-                  year = date.jYear();
-                  month = date.jMonth() + 1;
-                  day = date.jDate();
-                  break;
-              case "!":
-              if(this.calendarType){
-                  date = moment((getNumber("!") - this.ticksTo1970) / 10000);
-                  year = date.jYear();
-                  month = date.jMonth() + 1;
-                  day = date.jDate();
-                  break;
-              }
-              else{
-                  date = moment((getNumber("!") - this.ticksTo1970) / 10000);
-                  year = date.year();
-                  month = date.month() + 1;
-                  day = date.date();
-                  break;
-              }
+        switch (format.charAt(iFormat)) {
+          case "d":
+            day = getNumber("d");
+            break;
+          case "D":
+            getName("D", this.locale.dayNamesShort, this.locale.dayNames);
+            break;
+          case "o":
+            doy = getNumber("o");
+            break;
+          case "m":
+            month = getNumber("m");
+            break;
+          case "M":
+            month = getName("M", this.locale.monthNamesShort, this.locale.monthNames);
+            break;
+          case "y":
+            year = getNumber("y");
+            break;
+          case "@":
+            date = moment(getNumber("@"));
+            year = date.jYear();
+            month = date.jMonth() + 1;
+            day = date.jDate();
+            break;
+          case "!":
+            if (this.calendarType) {
+              date = moment((getNumber("!") - this.ticksTo1970) / 10000);
+              year = date.jYear();
+              month = date.jMonth() + 1;
+              day = date.jDate();
+              break;
+            }
+            else {
+              date = moment((getNumber("!") - this.ticksTo1970) / 10000);
+              year = date.year();
+              month = date.month() + 1;
+              day = date.date();
+              break;
+            }
 
-              case "'":
-                  if (lookAhead("'")) {
-                      checkLiteral();
-                  } else {
-                      literal = true;
-                  }
-                  break;
-              default:
-                  checkLiteral();
-          }
+          case "'":
+            if (lookAhead("'")) {
+              checkLiteral();
+            } else {
+              literal = true;
+            }
+            break;
+          default:
+            checkLiteral();
+        }
       }
-  }
+    }
 
-  if (iValue < value.length) {
+    if (iValue < value.length) {
       extra = value.substr(iValue);
       if (!/^\s+/.test(extra)) {
-          throw "Extra/unparsed characters found in date: " + extra;
-      }
-  }
-    if(this.calendarType){
-      if (year === -1) {
-          year = moment().jYear();
-      } else if (year < 100) {
-          year += moment().jYear() - moment().jYear() % 100 +
-              (year <= shortYearCutoff ? 0 : -100);
+        throw "Extra/unparsed characters found in date: " + extra;
       }
     }
-    else{
+    if (this.calendarType) {
       if (year === -1) {
-          year = moment().year();
+        year = moment().jYear();
       } else if (year < 100) {
-          year += moment().year() - moment().year() % 100 +
-              (year <= shortYearCutoff ? 0 : -100);
+        year += moment().jYear() - moment().jYear() % 100 +
+          (year <= shortYearCutoff ? 0 : -100);
+      }
+    }
+    else {
+      if (year === -1) {
+        year = moment().year();
+      } else if (year < 100) {
+        year += moment().year() - moment().year() % 100 +
+          (year <= shortYearCutoff ? 0 : -100);
       }
     }
 
 
-  if (doy > -1) {
+    if (doy > -1) {
       month = 1;
       day = doy;
       do {
-          dim = this.getDaysCountInMonth(year, month - 1);
-          if (day <= dim) {
-              break;
-          }
-          month++;
-          day -= dim;
+        dim = this.getDaysCountInMonth(year, month - 1);
+        if (day <= dim) {
+          break;
+        }
+        month++;
+        day -= dim;
       } while (true);
-  }
-    if(this.calendarType){
+    }
+    if (this.calendarType) {
       date = this.daylightSavingAdjust(moment([year, month - 1, day]));
       if (date.jYear() !== year || date.jMonth() + 1 !== month || date.jDate() !== day) {
-          throw "Invalid date"; // E.g. 31/02/00
+        throw "Invalid date"; // E.g. 31/02/00
       }
     }
-    else{
+    else {
       date = this.daylightSavingAdjust(moment([year, month - 1, day]));
       if (date.year() !== year || date.month() + 1 !== month || date.date() !== day) {
-          throw "Invalid date"; // E.g. 31/02/00
+        throw "Invalid date"; // E.g. 31/02/00
       }
     }
 
 
-  return date;
+    return date;
   }
 
   daylightSavingAdjust(date) {
@@ -2080,13 +2080,13 @@ else{
   onTodayButtonClick(event) {
 
     let dateMeta;
-    let date:moment.Moment = moment();
-    if(this.calendarType){
-     dateMeta = { day: date.jDate(), month: date.jMonth(), year: date.jYear(), otherMonth: date.jMonth() !== this.currentMonth || date.jYear() !== this.currentYear, today: true, selectable: true };
+    let date: moment.Moment = moment();
+    if (this.calendarType) {
+      dateMeta = { day: date.jDate(), month: date.jMonth(), year: date.jYear(), otherMonth: date.jMonth() !== this.currentMonth || date.jYear() !== this.currentYear, today: true, selectable: true };
 
     }
-    else{
-        dateMeta = { day: date.date(), month: date.month(), year: date.year(), otherMonth: date.month() !== this.currentMonth || date.year() !== this.currentYear, today: true, selectable: true };
+    else {
+      dateMeta = { day: date.date(), month: date.month(), year: date.year(), otherMonth: date.month() !== this.currentMonth || date.year() !== this.currentYear, today: true, selectable: true };
 
     }
 
