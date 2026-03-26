@@ -5,7 +5,7 @@ export type ElementType = HTMLElement | any;
 @Injectable({
   providedIn: 'root'
 })
-export class PrimengDatepickerService {
+export class PersianDatepickerService {
 
   public zindex: number = 1000;
   public static zindex: number = 1000;

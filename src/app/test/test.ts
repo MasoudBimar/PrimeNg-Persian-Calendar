@@ -1,14 +1,14 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import moment from 'jalali-moment';
-import { PrimengDatepickerComponent } from '../prime-ng-date-picker/primeng-datepicker.component';
+import { PersianDatepickerComponent } from '../persian-datepicker/persian-datepicker';
 
 @Component({
   selector: 'app-test',
   templateUrl: './test.html',
   styleUrls: ['./test.css'],
   imports: [
-    PrimengDatepickerComponent,
+    PersianDatepickerComponent,
     FormsModule
   ]
 })
@@ -23,7 +23,6 @@ export class TestComponent {
     this.date = moment().locale('fa');
     // this.date2 = moment().locale('en');
     console.log(this.date.format());
-    // console.log(this.date2.format());
   }
 
 }
