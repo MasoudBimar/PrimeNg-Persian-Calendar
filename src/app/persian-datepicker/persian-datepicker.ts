@@ -1,27 +1,28 @@
 /* eslint-disable @angular-eslint/no-output-on-prefix */
 import {
   AfterContentInit,
-  afterNextRender,
+  ChangeDetectorRef,
   Component, computed, contentChild, contentChildren, effect, ElementRef,
   forwardRef, inject, input, model, OnDestroy, OnInit, output,
   signal, TemplateRef, viewChild,
   ViewEncapsulation
 } from '@angular/core';
+import { MotionEvent, MotionOptions } from '@primeuix/motion';
 import moment, { isDate } from 'jalali-moment';
 import 'moment/locale/fa';
 import { Bind, BindModule } from 'primeng/bind';
 import { InputText } from 'primeng/inputtext';
+import { MotionModule } from 'primeng/motion';
 import { ZIndexUtils } from 'primeng/utils';
 import { Subscription } from 'rxjs';
 import { PersianDatepickerService } from '../service/persian-datepicker.service';
-import { MotionModule } from 'primeng/motion';
-import { MotionEvent, MotionOptions } from '@primeuix/motion';
 
 
 import { CommonModule, NgTemplateOutlet } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { OverlayService, SharedModule, TranslationKeys } from 'primeng/api';
 import { AutoFocus } from 'primeng/autofocus';
+import { PARENT_INSTANCE } from 'primeng/basecomponent';
 import { BaseInput } from 'primeng/baseinput';
 import { Button, ButtonModule } from 'primeng/button';
 import { DatePickerButtonBarTemplateContext, DatePickerDateTemplateContext, DatePickerDecadeTemplateContext, DatePickerDisabledDateTemplateContext, DatePickerInputIconTemplateContext, DatePickerModule, DatePickerMonthChangeEvent, DatePickerPassThrough, DatePickerResponsiveOptions, DatePickerStyle, DatePickerTypeView, DatePickerYearChangeEvent, Month, NavigationState } from 'primeng/datepicker';
@@ -29,7 +30,6 @@ import { ConnectedOverlayScrollHandler, DomHandler } from 'primeng/dom';
 import { CalendarIcon, ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon, ChevronUpIcon, TimesIcon } from 'primeng/icons';
 import { Ripple } from 'primeng/ripple';
 import { addStyle, getIndex, hasClass, PrimeTemplate } from './shared';
-import { PARENT_INSTANCE } from 'primeng/basecomponent';
 declare type Nullable<T = void> = T | null | undefined;
 declare type VoidListener = VoidFunction | null | undefined;
 declare interface DateMeta {
@@ -157,11 +157,12 @@ export const ENGLISH_LOCALE: LocaleSettings = {
     CommonModule, InputText, BindModule, NgTemplateOutlet, AutoFocus,
     DatePickerModule, SharedModule,
     Button,
-    Ripple, ChevronLeftIcon, ChevronRightIcon, ChevronUpIcon, ChevronDownIcon, TimesIcon, CalendarIcon,
+    Ripple,
+    ChevronLeftIcon, ChevronRightIcon, ChevronUpIcon, ChevronDownIcon, TimesIcon, CalendarIcon,
     MotionModule,
   ],
   hostDirectives: [Bind],
-  encapsulation: ViewEncapsulation.None,
+  // encapsulation: ViewEncapsulation.None,
   host: {
     '[class]': 'cn(cx("root"), styleClass())',
     '[style]': 'sx("root")'
@@ -1047,7 +1048,7 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
       }
       this.updateModel(this.value);
     } else {
-      if (this.shouldSelectDate(dateMeta)) {
+      if (this.shouldSelectDate()) {
         this.selectDate(dateMeta);
       }
     }
@@ -1069,7 +1070,7 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
     event.preventDefault();
   }
 
-  shouldSelectDate(dateMeta: DateMeta): boolean {
+  shouldSelectDate(): boolean {
     const maxDateCount = this.maxDateCount();
     if (this.isMultipleSelection())
       return !maxDateCount || !this.value || (!!maxDateCount && maxDateCount > this.value.length);
