@@ -1,11 +1,9 @@
 /* eslint-disable @angular-eslint/no-output-on-prefix */
 import {
   AfterContentInit,
-  ChangeDetectorRef,
   Component, computed, contentChild, contentChildren, effect, ElementRef,
   forwardRef, inject, input, model, OnDestroy, OnInit, output,
-  signal, TemplateRef, viewChild,
-  ViewEncapsulation
+  signal, TemplateRef, viewChild
 } from '@angular/core';
 import { MotionEvent, MotionOptions } from '@primeuix/motion';
 import moment, { isDate } from 'jalali-moment';
@@ -18,14 +16,14 @@ import { Subscription } from 'rxjs';
 import { PersianDatepickerService } from '../service/persian-datepicker.service';
 
 
-import { CommonModule, NgTemplateOutlet } from '@angular/common';
+import { NgTemplateOutlet } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { OverlayService, SharedModule, TranslationKeys } from 'primeng/api';
 import { AutoFocus } from 'primeng/autofocus';
 import { PARENT_INSTANCE } from 'primeng/basecomponent';
 import { BaseInput } from 'primeng/baseinput';
 import { Button, ButtonModule } from 'primeng/button';
-import { DatePickerButtonBarTemplateContext, DatePickerDateTemplateContext, DatePickerDecadeTemplateContext, DatePickerDisabledDateTemplateContext, DatePickerInputIconTemplateContext, DatePickerModule, DatePickerMonthChangeEvent, DatePickerPassThrough, DatePickerResponsiveOptions, DatePickerStyle, DatePickerTypeView, DatePickerYearChangeEvent, Month, NavigationState } from 'primeng/datepicker';
+import { DatePickerButtonBarTemplateContext, DatePickerDateTemplateContext, DatePickerDecadeTemplateContext, DatePickerDisabledDateTemplateContext, DatePickerInputIconTemplateContext, DatePickerModule, DatePickerMonthChangeEvent, DatePickerPassThrough, DatePickerResponsiveOptions, DatePickerStyle, DatePickerTypeView, DatePickerYearChangeEvent, NavigationState } from 'primeng/datepicker';
 import { ConnectedOverlayScrollHandler, DomHandler } from 'primeng/dom';
 import { CalendarIcon, ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon, ChevronUpIcon, TimesIcon } from 'primeng/icons';
 import { Ripple } from 'primeng/ripple';
@@ -154,7 +152,7 @@ export const ENGLISH_LOCALE: LocaleSettings = {
   imports: [
     ButtonModule,
     NgTemplateOutlet,
-    CommonModule, InputText, BindModule, NgTemplateOutlet, AutoFocus,
+    InputText, BindModule, NgTemplateOutlet, AutoFocus,
     DatePickerModule, SharedModule,
     Button,
     Ripple,
@@ -363,13 +361,6 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
   inputfieldViewChild = viewChild<ElementRef>('inputfield');
 
   value: any;
-  months!: any[];
-  weekDays: Nullable<string[]>;
-  currentMonth!: number;
-  currentYear!: number;
-  currentHour: Nullable<number>;
-  currentMinute: Nullable<number>;
-  currentSecond: Nullable<number>;
   pm: Nullable<boolean>;
   mask: Nullable<HTMLDivElement>;
   maskClickListener: VoidListener;
@@ -525,15 +516,21 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
   iconButtonAriaLabel = computed(() => {
     const iconAriaLabel = this.iconAriaLabel();
     return iconAriaLabel ? iconAriaLabel : this.getTranslation('chooseDate');
-  })
+  });
 
   prevIconAriaLabel = computed(() => {
     return this.view() === 'year' ? this.getTranslation('prevDecade') : this.view() === 'month' ? this.getTranslation('prevYear') : this.getTranslation('prevMonth');
-  })
+  });
 
   nextIconAriaLabel = computed(() => {
     return this.view() === 'year' ? this.getTranslation('nextDecade') : this.view() === 'month' ? this.getTranslation('nextYear') : this.getTranslation('nextMonth');
-  })
+  });
+
+  currentMonth = signal<number>(1);
+  currentYear = signal<number>(new Date().getFullYear());
+  currentHour = signal<number>(0);
+  currentMinute = signal<number>(0);
+  currentSecond = signal<number>(0);
 
 
   constructor() {
@@ -542,27 +539,20 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
       const customLocale = this.customLocale();
       const view = this.view();
       if (customLocale) {
-        if (view === 'date') {
-          this.createWeekDays();
-          this.createMonths(this.currentMonth, this.currentYear);
-        }
-        else if (view === 'month') {
+        if (view === 'month') {
           this.createMonthPickerValues();
         }
       }
     });
 
-    effect(() => {
-      const defaultDate = this.defaultDate();
+    const defaultDate = this.defaultDate();
 
-      if (this.initialized) {
-        const date = defaultDate || new Date();
-        this.currentMonth = date.getMonth();
-        this.currentYear = date.getFullYear();
-        this.initTime(date);
-        this.createMonths(this.currentMonth, this.currentYear);
-      }
-    });
+    if (this.initialized) {
+      const date = defaultDate || new Date();
+      this.currentMonth.set(date.getMonth());
+      this.currentYear.set(date.getFullYear());
+      this.initTime(date);
+    }
 
     //! should be refactored
     effect(() => {
@@ -571,26 +561,25 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
       if (this.initialized) {
         this.updateInputfield();
       }
-
     });
 
     //! should be refactored
-    effect(() => {
-      this.minDate();
-      this.maxDate();
-      this.disabledDates();
-      this.disabledDays();
+    // effect(() => {
+    //   this.minDate();
+    //   this.maxDate();
+    //   this.disabledDates();
+    //   this.disabledDays();
 
-      if (this.currentMonth != undefined && this.currentMonth != null && this.currentYear) {
-        this.createMonths(this.currentMonth, this.currentYear);
-      }
-    });
+    //   if (this.currentMonth() != undefined && this.currentMonth() != null && this.currentYear()) {
+    //     this.createMonths(this.currentMonth, this.currentYear);
+    //   }
+    // });
 
     //! should be refactored
     effect(() => {
       this.showTime();
 
-      if (this.currentHour === undefined) {
+      if (this.currentHour() === undefined) {
         this.initTime(this.value || moment());
       }
       this.updateInputfield();
@@ -604,13 +593,6 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
       this.destroyResponsiveStyleElement();
       this.createResponsiveStyle();
     });
-
-    //! should be refactored
-    effect(() => {
-      this.firstDayOfWeek();
-      this.createWeekDays();
-    });
-
   }
 
 
@@ -622,12 +604,12 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
 
     const date = moment(this.InitialValue()) || moment();
     if (this.calendarType()) {
-      this.currentMonth = date.jMonth();
-      this.currentYear = date.jYear();
+      this.currentMonth.set(date.jMonth());
+      this.currentYear.set(date.jYear());
     }
     else {
-      this.currentMonth = date.month();
-      this.currentYear = date.year();
+      this.currentMonth.set(date.month());
+      this.currentYear.set(date.year());
     }
     const yearRange = this.yearRange();
     if (this.yearNavigator() && yearRange) {
@@ -639,9 +621,9 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
     }
 
     if (this.view() === 'date') {
-      this.createWeekDays();
+      // this.createWeekDays();
       this.initTime(date.toDate());
-      this.createMonths(this.currentMonth, this.currentYear);
+      // this.createMonths(this.currentMonth, this.currentYear);
       this.ticksTo1970 = (((1970 - 1) * 365 + Math.floor(1970 / 4) - Math.floor(1970 / 100) + Math.floor(1970 / 400)) * 24 * 60 * 60 * 10000000);
 
     }
@@ -746,16 +728,18 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
     }
   }
 
-  createWeekDays() {
-    this.weekDays = [];
+  weekDays = computed(() => {
+    this.view();
     let dayIndex = this.firstDayOfWeek();
+    const weekDays = [];
     if (dayIndex) {
       for (let i = 0; i < 7; i++) {
-        this.weekDays.push(this.locale().dayNamesMin[dayIndex]);
+        weekDays.push(this.locale().dayNamesMin[dayIndex]);
         dayIndex = dayIndex == 6 ? 0 : ++dayIndex;
       }
     }
-  }
+    return weekDays;
+  });
 
   createMonthPickerValues() {
 
@@ -767,7 +751,7 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
 
   yearPickerValues() {
     const yearPickerValues: any[] = [];
-    const base = this.currentYear - (this.currentYear % 10);
+    const base = this.currentYear() - (this.currentYear() % 10);
     for (let i = 0; i < 10; i++) {
       yearPickerValues.push(base + i);
     }
@@ -775,19 +759,37 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
     return yearPickerValues;
   }
 
-  createMonths(month: number, year: number) {
-    this.months = this.months = [];
+  // createMonths(month: number, year: number) {
+  //   this.months = this.months = [];
+  //   for (let i = 0; i < this.numberOfMonths(); i++) {
+  //     let m = month + i;
+  //     let y = year;
+  //     if (m > 11) {
+  //       m = m % 12;
+  //       y = year + Math.floor((month + i) / 12);
+  //     }
+
+  //     this.months.push(this.createMonth(m, y));
+  //   }
+  // }
+
+  months = computed(() => {
+    const currentYear = this.currentYear();
+    const currentMonth = this.currentMonth();
+    const view = this.view();
+    let months = [];
     for (let i = 0; i < this.numberOfMonths(); i++) {
-      let m = month + i;
-      let y = year;
+      let m = (currentMonth ?? 0) + i;
+      let y = currentYear;
       if (m > 11) {
         m = m % 12;
-        y = year + Math.floor((month + i) / 12);
+        y = currentYear + Math.floor((currentMonth + i) / 12);
       }
 
-      this.months.push(this.createMonth(m, y));
+      months.push(this.createMonth(m, y));
     }
-  }
+    return months;
+  });
 
   getWeekNumber(date: Date) {
     const checkDate = new Date(date.getTime());
@@ -803,7 +805,7 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
     return Math.floor(Math.round((time - checkDate.getTime()) / 86400000) / 7) + 1;
   }
 
-  createMonth(month: number, year: number): Month {
+  createMonth(month: number, year: number): { month: number, year: number, dates: any[], weekNumbers: number[] } {
 
     const dates = [];
     const firstDay = this.getFirstDayOfMonthIndex(month, year);
@@ -891,36 +893,36 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
       this.pm = date.getHours() > 11;
 
       if (this.showTime()) {
-        this.currentMinute = date.getMinutes();
-        this.currentSecond = date.getSeconds();
+        this.currentMinute.set(date.getMinutes());
+        this.currentSecond.set(date.getSeconds());
 
         if (this.hourFormat() == '12')
-          this.currentHour = date.getHours() == 0 ? 12 : date.getHours() % 12;
+          this.currentHour.set(date.getHours() == 0 ? 12 : date.getHours() % 12);
         else
-          this.currentHour = date.getHours();
+          this.currentHour.set(date.getHours());
       }
       else if (this.timeOnly()) {
-        this.currentMinute = 0;
-        this.currentHour = 0;
-        this.currentSecond = 0;
+        this.currentMinute.set(0);
+        this.currentHour.set(0);
+        this.currentSecond.set(0);
       }
 
     } else if (moment.isMoment(date)) {
       this.pm = date.hours() > 11;
 
       if (this.showTime()) {
-        this.currentMinute = date.minutes();
-        this.currentSecond = date.seconds();
+        this.currentMinute.set(date.minutes());
+        this.currentSecond.set(date.seconds());
 
         if (this.hourFormat() == '12')
-          this.currentHour = date.hours() == 0 ? 12 : date.hours() % 12;
+          this.currentHour.set(date.hours() == 0 ? 12 : date.hours() % 12);
         else
-          this.currentHour = date.hours();
+          this.currentHour.set(date.hours());
       }
       else if (this.timeOnly()) {
-        this.currentMinute = 0;
-        this.currentHour = 0;
-        this.currentSecond = 0;
+        this.currentMinute.set(0);
+        this.currentHour.set(0);
+        this.currentSecond.set(0);
       }
     }
 
@@ -947,15 +949,15 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
         this.updateFocus();
       }, 1);
     } else {
-      if (this.currentMonth === 0) {
-        this.currentMonth = 11;
+      if (this.currentMonth() === 0) {
+        this.currentMonth.set(11);
         this.decrementYear();
       } else {
-        this.currentMonth--;
+        this.currentMonth.update(month => month - 1);
       }
 
-      this.onMonthChange.emit({ month: this.currentMonth + 1, year: this.currentYear });
-      this.createMonths(this.currentMonth, this.currentYear);
+      this.onMonthChange.emit({ month: this.currentMonth() + 1, year: this.currentYear() });
+      // this.createMonths(this.currentMonth, this.currentYear);
     }
   }
 
@@ -980,46 +982,46 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
         this.updateFocus();
       }, 1);
     } else {
-      if (this.currentMonth === 11) {
-        this.currentMonth = 0;
+      if (this.currentMonth() === 11) {
+        this.currentMonth.set(0);
         this.incrementYear();
       } else {
-        this.currentMonth++;
+        this.currentMonth.update(month => month + 1);
       }
 
-      this.onMonthChange.emit({ month: this.currentMonth + 1, year: this.currentYear });
-      this.createMonths(this.currentMonth, this.currentYear);
+      this.onMonthChange.emit({ month: this.currentMonth() + 1, year: this.currentYear() });
+      // this.createMonths(this.currentMonth, this.currentYear);
     }
   }
 
   decrementYear() {
 
-    this.currentYear--;
+    this.currentYear.update(year => year - 1);
     const yearOptions = this.yearOptions;
 
 
-    if (yearOptions && yearOptions.length > 0 && this.yearNavigator() && this.currentYear < yearOptions[0]) {
+    if (yearOptions && yearOptions.length > 0 && this.yearNavigator() && this.currentYear() < yearOptions[0]) {
       const difference = yearOptions[yearOptions.length - 1] - yearOptions[0];
       this.populateYearOptions(yearOptions[0] - difference, yearOptions[yearOptions.length - 1] - difference);
     }
   }
 
   incrementYear() {
-    this.currentYear++;
+    this.currentYear.update(year => year + 1);
     const yearOptions = this.yearOptions;
 
-    if (yearOptions && yearOptions.length > 0 && this.yearNavigator() && this.currentYear > yearOptions[yearOptions.length - 1]) {
+    if (yearOptions && yearOptions.length > 0 && this.yearNavigator() && this.currentYear() > yearOptions[yearOptions.length - 1]) {
       const difference = yearOptions[yearOptions.length - 1] - yearOptions[0];
       this.populateYearOptions(yearOptions[0] + difference, yearOptions[yearOptions.length - 1] + difference);
     }
   }
 
   decrementDecade() {
-    this.currentYear = this.currentYear - 10;
+    this.currentYear.update(year => year - 10);
   }
 
   incrementDecade() {
-    this.currentYear = this.currentYear + 10;
+    this.currentYear.update(year => year + 10);
   }
 
   switchToMonthView(event: Event) {
@@ -1080,12 +1082,12 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
 
   onMonthSelect(event: Event, index: number) {
     if (this.view() === 'month') {
-      this.onDateSelect(event, { year: this.currentYear, month: index, day: 1, selectable: true });
+      this.onDateSelect(event, { year: this.currentYear(), month: index, day: 1, selectable: true });
     } else {
-      this.currentMonth = index;
-      this.createMonths(this.currentMonth, this.currentYear);
+      this.currentMonth.set(index);
+      // this.createMonths(this.currentMonth, this.currentYear);
       this.setCurrentView('date');
-      this.onMonthChange.emit({ month: this.currentMonth + 1, year: this.currentYear });
+      this.onMonthChange.emit({ month: this.currentMonth() + 1, year: this.currentYear() });
     }
   }
 
@@ -1093,9 +1095,9 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
     if (this.view() === 'year') {
       this.onDateSelect(event, { year: year, month: 0, day: 1, selectable: true });
     } else {
-      this.currentYear = year;
+      this.currentYear.set(year);
       this.setCurrentView('month');
-      this.onYearChange.emit({ month: this.currentMonth + 1, year: this.currentYear });
+      this.onYearChange.emit({ month: this.currentMonth() + 1, year: this.currentYear() });
     }
   }
 
@@ -1170,12 +1172,12 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
     if (this.hourFormat() == '12') {
       this.pm = hours > 11;
       if (hours >= 12) {
-        this.currentHour = hours == 12 ? 12 : hours - 12;
+        this.currentHour.set(hours == 12 ? 12 : hours - 12);
       } else {
-        this.currentHour = hours == 0 ? 12 : hours;
+        this.currentHour.set(hours == 0 ? 12 : hours);
       }
     } else {
-      this.currentHour = hours;
+      this.currentHour.set(hours);
     }
   }
 
@@ -1190,28 +1192,28 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
 
     if (this.showTime()) {
       if (this.hourFormat() == '12') {
-        if (this.currentHour === 12) date.setHours(this.pm ? 12 : 0);
-        else date.setHours(this.pm ? this.currentHour as number + 12 : this.currentHour as number);
+        if (this.currentHour() === 12) date.setHours(this.pm ? 12 : 0);
+        else date.setHours(this.pm ? this.currentHour() + 12 : this.currentHour());
       } else {
-        date.setHours(this.currentHour as number);
+        date.setHours(this.currentHour());
       }
 
-      date.setMinutes(this.currentMinute as number);
-      date.setSeconds(this.currentSecond as number);
+      date.setMinutes(this.currentMinute());
+      date.setSeconds(this.currentSecond());
     }
 
     const minDate = this.minDate();
     if (minDate && minDate > date) {
       this.setCurrentHourPM(minDate.getHours());
-      this.currentMinute = minDate.getMinutes();
-      this.currentSecond = minDate.getSeconds();
+      this.currentMinute.set(minDate.getMinutes());
+      this.currentSecond.set(minDate.getSeconds());
     }
 
     const maxDate = this.maxDate();
     if (maxDate && maxDate < date) {
       this.setCurrentHourPM(maxDate.getHours());
-      this.currentMinute = maxDate.getMinutes();
-      this.currentSecond = maxDate.getSeconds();
+      this.currentMinute.set(maxDate.getMinutes());
+      this.currentSecond.set(maxDate.getSeconds());
     }
 
     if (this.isSingleSelection()) {
@@ -1375,12 +1377,12 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
 
     //! should be refactored
     if (this.isMultipleSelection()) {
-      return this.value.some((currentValue: any) => currentValue.getMonth() === month && currentValue.getFullYear() === this.currentYear);
+      return this.value.some((currentValue: any) => currentValue.getMonth() === month && currentValue.getFullYear() === this.currentYear());
     } else if (this.isRangeSelection()) {
       if (!this.value[1]) {
-        return this.value[0]?.getFullYear() === this.currentYear && this.value[0]?.getMonth() === month;
+        return this.value[0]?.getFullYear() === this.currentYear() && this.value[0]?.getMonth() === month;
       } else {
-        const currentDate = new Date(this.currentYear, month, 1);
+        const currentDate = new Date(this.currentYear(), month, 1);
         const startDate = new Date(this.value[0].getFullYear(), this.value[0].getMonth(), 1);
         const endDate = new Date(this.value[1].getFullYear(), this.value[1].getMonth(), 1);
 
@@ -1389,15 +1391,15 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
     } else {
 
       if (this.calendarType())
-        return this.value ? (this.value.jMonth() === month && this.value.jYear() === this.currentYear) : false;
+        return this.value ? (this.value.jMonth() === month && this.value.jYear() === this.currentYear()) : false;
       else
-        return this.value ? (this.value.month() === month && this.value.year() === this.currentYear) : false;
+        return this.value ? (this.value.month() === month && this.value.year() === this.currentYear()) : false;
 
     }
   }
 
   isMonthDisabled(month: number, year?: number) {
-    const yearToCheck = year ?? this.currentYear;
+    const yearToCheck = year ?? this.currentYear();
 
     for (let day = 1; day < this.getDaysCountInMonth(month, yearToCheck) + 1; day++) {
       if (this.isSelectable(day, month, yearToCheck, false)) {
@@ -1663,7 +1665,7 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
   }
 
   getYear(month: any) {
-    return this.view() === 'month' ? this.currentYear : month.year;
+    return this.view() === 'month' ? this.currentYear() : month.year;
   }
 
   switchViewButtonDisabled() {
@@ -2245,16 +2247,16 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
 
   onMonthDropdownChange(event: Event) {
     const m = (event.target as HTMLInputElement).value;
-    this.currentMonth = parseInt(m);
-    this.onMonthChange.emit({ month: this.currentMonth + 1, year: this.currentYear });
-    this.createMonths(this.currentMonth, this.currentYear);
+    this.currentMonth.set(parseInt(m));
+    this.onMonthChange.emit({ month: this.currentMonth() + 1, year: this.currentYear() });
+    // this.createMonths(this.currentMonth, this.currentYear);
   }
 
   onYearDropdownChange(event: Event) {
     const y = (event.target as HTMLInputElement).value;
-    this.currentYear = parseInt(y);
-    this.onYearChange.emit({ month: this.currentMonth + 1, year: this.currentYear });
-    this.createMonths(this.currentMonth, this.currentYear);
+    this.currentYear.set(parseInt(y));
+    this.onYearChange.emit({ month: this.currentMonth() + 1, year: this.currentYear() });
+    // this.createMonths(this.currentMonth, this.currentYear);
   }
 
   convertTo24Hour(hours: number, pm: boolean): number {
@@ -2268,7 +2270,7 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
     return hours;
   }
 
-  constrainTime(hour: number, minute: number, second: number, pm: boolean) {
+  constrainTime(hour: number, minute: number, second: number, pm: boolean): number[] {
     const returnTimeTriple: number[] = [hour, minute, second];
     let minHoursExceeds12: boolean = false;
     let value = this.value;
@@ -2322,7 +2324,7 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
 
       case isMinDate && minHoursExceeds12 && this.minDate()!.getHours() > convertedHour && convertedHour !== 12:
         this.setCurrentHourPM(this.minDate()!.getHours());
-        returnTimeTriple[0] = this.currentHour || 0;
+        returnTimeTriple[0] = this.currentHour() || 0;
         break;
       case isMinDate && this.minDate()!.getHours() === convertedHour && this.minDate()!.getMinutes() > minute:
         returnTimeTriple[1] = this.minDate()!.getMinutes();
@@ -2354,8 +2356,8 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
   }
 
   incrementHour(event: Event) {
-    const prevHour = this.currentHour ?? 0;
-    let newHour = (this.currentHour ?? 0) + this.stepHour();
+    const prevHour = this.currentHour() ?? 0;
+    let newHour = (this.currentHour() ?? 0) + this.stepHour();
     let newPM = this.pm;
     if (this.hourFormat() == '24') newHour = newHour >= 24 ? newHour - 24 : newHour;
     else if (this.hourFormat() == '12') {
@@ -2366,7 +2368,10 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
       newHour = newHour >= 13 ? newHour - 12 : newHour;
     }
     this.toggleAMPMIfNotMinDate(newPM!);
-    [this.currentHour, this.currentMinute, this.currentSecond] = this.constrainTime(newHour, this.currentMinute!, this.currentSecond!, newPM!);
+    let time = this.constrainTime(newHour, this.currentMinute()!, this.currentSecond()!, newPM!);
+    this.currentHour.set(time[0]);
+    this.currentMinute.set(time[1]);
+    this.currentSecond.set(time[2]);
     event.preventDefault();
   }
 
@@ -2446,46 +2451,61 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
   }
 
   decrementHour(event: any) {
-    let newHour = (this.currentHour ?? 0) - this.stepHour();
+    let newHour = this.currentHour() - this.stepHour();
     let newPM = this.pm;
     if (this.hourFormat() == '24') newHour = newHour < 0 ? 24 + newHour : newHour;
     else if (this.hourFormat() == '12') {
       // If we were at noon/midnight, then switch
-      if (this.currentHour === 12) {
+      if (this.currentHour() === 12) {
         newPM = !this.pm;
       }
       newHour = newHour <= 0 ? 12 + newHour : newHour;
     }
     this.toggleAMPMIfNotMinDate(newPM!);
-    [this.currentHour, this.currentMinute, this.currentSecond] = this.constrainTime(newHour, this.currentMinute!, this.currentSecond!, newPM!);
+    let time = this.constrainTime(newHour, this.currentMinute()!, this.currentSecond()!, newPM!);
+    this.currentHour.set(time[0]);
+    this.currentMinute.set(time[1]);
+    this.currentSecond.set(time[2]);
     event.preventDefault();
   }
 
   incrementMinute(event: any) {
-    let newMinute = (this.currentMinute ?? 0) + this.stepMinute();
+    let newMinute = this.currentMinute() + this.stepMinute();
     newMinute = newMinute > 59 ? newMinute - 60 : newMinute;
-    [this.currentHour, this.currentMinute, this.currentSecond] = this.constrainTime(this.currentHour || 0, newMinute, this.currentSecond!, this.pm!);
+    let time = this.constrainTime(this.currentHour() || 0, newMinute, this.currentSecond()!, this.pm!);
+    this.currentHour.set(time[0]);
+    this.currentMinute.set(time[1]);
+    this.currentSecond.set(time[2]);
     event.preventDefault();
   }
 
   decrementMinute(event: any) {
-    let newMinute = (this.currentMinute ?? 0) - this.stepMinute();
+    let newMinute = this.currentMinute() - this.stepMinute();
     newMinute = newMinute < 0 ? 60 + newMinute : newMinute;
-    [this.currentHour, this.currentMinute, this.currentSecond] = this.constrainTime(this.currentHour || 0, newMinute, this.currentSecond || 0, this.pm!);
+    let time = this.constrainTime(this.currentHour() || 0, newMinute, this.currentSecond() || 0, this.pm!);
+    this.currentHour.set(time[0]);
+    this.currentMinute.set(time[1]);
+    this.currentSecond.set(time[2]);
     event.preventDefault();
   }
 
   incrementSecond(event: any) {
-    let newSecond = (this.currentSecond ?? 0) + this.stepSecond();
+    let newSecond = this.currentSecond() + this.stepSecond();
     newSecond = newSecond > 59 ? newSecond - 60 : newSecond;
-    [this.currentHour, this.currentMinute, this.currentSecond] = this.constrainTime(this.currentHour || 0, this.currentMinute || 0, newSecond, this.pm!);
+    const time = this.constrainTime(this.currentHour() || 0, this.currentMinute() || 0, newSecond, this.pm!);
+    this.currentHour.set(time[0]);
+    this.currentMinute.set(time[1]);
+    this.currentSecond.set(time[2]);
     event.preventDefault();
   }
 
   decrementSecond(event: any) {
-    let newSecond = (this.currentSecond ?? 0) - this.stepSecond();
+    let newSecond = this.currentSecond() - this.stepSecond();
     newSecond = newSecond < 0 ? 60 + newSecond : newSecond;
-    [this.currentHour, this.currentMinute, this.currentSecond] = this.constrainTime(this.currentHour || 0, this.currentMinute || 0, newSecond, this.pm!);
+    const time = this.constrainTime(this.currentHour() || 0, this.currentMinute() || 0, newSecond, this.pm!);
+    this.currentHour.set(time[0]);
+    this.currentMinute.set(time[1]);
+    this.currentSecond.set(time[2]);
     event.preventDefault();
   }
 
@@ -2500,17 +2520,17 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
     value = value ? moment(value.unix()) : moment();
 
     if (this.hourFormat() == '12') {
-      if (this.currentHour === 12)
+      if (this.currentHour() === 12)
         value.hour(this.pm ? 12 : 0);
       else
-        value.hour(this.pm ? (this.currentHour ?? 0) + 12 : this.currentHour);
+        value.hour(this.pm ? (this.currentHour() ?? 0) + 12 : this.currentHour());
     }
     else {
-      value.hour(this.currentHour);
+      value.hour(this.currentHour());
     }
 
-    value.minute(this.currentMinute);
-    value.second(this.currentSecond);
+    value.minute(this.currentMinute());
+    value.second(this.currentSecond());
     if (this.isRangeSelection()) {
       if (this.value[1])
         value = [this.value[0], value];
@@ -2530,7 +2550,10 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
   toggleAMPM(event: Event) {
     const newPM = !this.pm;
     this.pm = newPM;
-    [this.currentHour, this.currentMinute, this.currentSecond] = this.constrainTime(this.currentHour || 0, this.currentMinute || 0, this.currentSecond || 0, newPM);
+    const time = this.constrainTime(this.currentHour() || 0, this.currentMinute() || 0, this.currentSecond() || 0, newPM);
+    this.currentHour.set(time[0]);
+    this.currentMinute.set(time[1]);
+    this.currentSecond.set(time[2]);
     this.updateTime();
     event.preventDefault();
   }
@@ -2670,14 +2693,14 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
     const val = this.defaultDate() && this.isValidDate(this.defaultDate()!) && !this.value ? this.defaultDate() : propValue && this.isValidDate(propValue) ? propValue : new Date();
 
     if (val && val instanceof Date) {
-      this.currentMonth = val.getMonth();
-      this.currentYear = val.getFullYear();
-      this.createMonths(this.currentMonth, this.currentYear);
+      this.currentMonth.set(val.getMonth());
+      this.currentYear.set(val.getFullYear());
+      // this.createMonths(this.currentMonth, this.currentYear);
 
       if (this.showTime() || this.timeOnly()) {
         this.setCurrentHourPM(val.getHours());
-        this.currentMinute = val.getMinutes();
-        this.currentSecond = this.showSeconds() ? val.getSeconds() : 0;
+        this.currentMinute.set(val.getMinutes());
+        this.currentSecond.set(this.showSeconds() ? val.getSeconds() : 0);
       }
     }
   }
@@ -3219,12 +3242,12 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
       day: date.getDate(),
       month: date.getMonth(),
       year: date.getFullYear(),
-      otherMonth: date.getMonth() !== this.currentMonth || date.getFullYear() !== this.currentYear,
+      otherMonth: date.getMonth() !== this.currentMonth() || date.getFullYear() !== this.currentYear(),
       today: true,
       selectable: true
     };
 
-    this.createMonths(date.getMonth(), date.getFullYear());
+    // this.createMonths(date.getMonth(), date.getFullYear());
     this.onDateSelect(event, dateMeta);
     this.onTodayClick.emit(date);
   }

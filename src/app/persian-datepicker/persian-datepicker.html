@@ -26,7 +26,7 @@
     [attr.readonly]="readonlyInput() ? '' : undefined"
     [attr.disabled]="$disabled() ? '' : undefined"
     (input)="onUserInput($event)"
-    [ngStyle]="inputStyle()"
+    [style]="inputStyle()"
     [class]="cn(cx('pcInputText'), inputStyleClass)"
     [attr.placeholder]="placeholder()"
     [attr.tabindex]="tabindex()"
@@ -76,7 +76,7 @@
       [pBind]="ptm('dropdown')"
     >
       @if (icon()) {
-        <span [ngClass]="icon()" [pBind]="ptm('dropdownIcon')"></span>
+        <span [class]="icon()" [pBind]="ptm('dropdownIcon')"></span>
       }
       @if (!icon()) {
         @if (!triggerIconTemplate() && !_triggerIconTemplate) {
@@ -125,7 +125,7 @@
     <div
       #contentWrapper
       [attr.id]="panelId"
-      [ngStyle]="panelStyle()"
+      [style]="panelStyle()"
       [class]="cn(cx('panel'), panelStyleClass())"
       [style.--p-datepicker-enter-options]="showTransitionOptions()"
       [style.--p-datepicker-leave-options]="hideTransitionOptions()"
@@ -143,7 +143,7 @@
       <ng-container *ngTemplateOutlet="headerTemplate() || _headerTemplate"></ng-container>
       @if (!timeOnly()) {
         <div [class]="cx('calendarContainer')" [pBind]="ptm('calendarContainer')">
-          @for (month of months; track month; let i = $index) {
+          @for (month of months(); track month; let i = $index) {
             <div [class]="cx('calendar')" [pBind]="ptm('calendar')">
               <div [class]="cx('header')" [pBind]="ptm('header')">
                 <p-button
@@ -153,13 +153,13 @@
                   (keydown)="onContainerButtonKeydown($event)"
                   [styleClass]="cx('pcPrevButton')"
                   (onClick)="onPrevButtonClick($event)"
-                  [ngStyle]="{ visibility: i === 0 ? 'visible' : 'hidden' }"
+                  [style]="{ visibility: i === 0 ? 'visible' : 'hidden' }"
                   type="button"
                   [ariaLabel]="prevIconAriaLabel()"
                   [pt]="ptm('pcPrevButton')"
                   [attr.data-pc-group-section]="'navigator'"
                 >
-                  <ng-template #prevIcon>
+                  <ng-template #icon>
                     @if (!previousIconTemplate() && !_previousIconTemplate) {
                       <svg data-p-icon="chevron-left"></svg>
                     }
@@ -225,12 +225,12 @@
                   (keydown)="onContainerButtonKeydown($event)"
                   [styleClass]="cx('pcNextButton')"
                   (onClick)="onNextButtonClick($event)"
-                  [ngStyle]="{ visibility: i === months.length - 1 ? 'visible' : 'hidden' }"
+                  [style]="{ visibility: i === months().length - 1 ? 'visible' : 'hidden' }"
                   [ariaLabel]="nextIconAriaLabel()"
                   [pt]="ptm('pcNextButton')"
                   [attr.data-pc-group-section]="'navigator'"
                 >
-                  <ng-template #nextIcon>
+                  <ng-template #icon>
                     @if (!nextIconTemplate() && !_nextIconTemplate) {
                       <svg data-p-icon="chevron-right"></svg>
                     }
@@ -254,7 +254,7 @@
                         </th>
                       }
                       @for (
-                        weekDay of weekDays;
+                        weekDay of weekDays();
                         track weekDay;
                         let begin = $first;
                         let end = $last
@@ -276,7 +276,7 @@
                               [class]="cx('weekLabelContainer')"
                               [pBind]="ptm('weekLabelContainer')"
                             >
-                              {{ month.weekNumbers[j] }}
+                              {{ month?.weekNumbers?.[j] }}
                             </span>
                           </td>
                         }
@@ -404,7 +404,7 @@
               [pt]="ptm('pcIncrementButton')"
               [attr.data-pc-group-section]="'timepickerbutton'"
             >
-              <ng-template #incIcon1>
+              <ng-template #icon>
                 @if (!incrementIconTemplate() && !_incrementIconTemplate) {
                   <svg data-p-icon="chevron-up" [pBind]="ptm('pcIncrementButton')['icon']"></svg>
                 }
@@ -414,10 +414,10 @@
               </ng-template>
             </p-button>
             <span [pBind]="ptm('hour')">
-              @if ((currentHour ?? 0) < 10) {
+              @if (currentHour() < 10) {
                 0
               }
-              {{ currentHour }}</span
+              {{ currentHour() }}</span
             >
             <p-button
               rounded
@@ -436,7 +436,7 @@
               [pt]="ptm('pcDecrementButton')"
               [attr.data-pc-group-section]="'timepickerbutton'"
             >
-              <ng-template #decIcon1>
+              <ng-template #icon>
                 @if (!decrementIconTemplate() && !_decrementIconTemplate) {
                   <svg data-p-icon="chevron-down" [pBind]="ptm('pcDecrementButton')['icon']"></svg>
                 }
@@ -467,7 +467,7 @@
               [pt]="ptm('pcIncrementButton')"
               [attr.data-pc-group-section]="'timepickerbutton'"
             >
-              <ng-template #incIcon2>
+              <ng-template #icon>
                 @if (!incrementIconTemplate() && !_incrementIconTemplate) {
                   <svg data-p-icon="chevron-up" [pBind]="ptm('pcIncrementButton')['icon']"></svg>
                 }
@@ -477,10 +477,10 @@
               </ng-template>
             </p-button>
             <span [pBind]="ptm('minute')">
-              @if ((currentMinute ?? 0) < 10) {
+              @if (currentMinute() < 10) {
                 0
               }
-              {{ currentMinute }}</span
+              {{ currentMinute() }}</span
             >
             <p-button
               rounded
@@ -499,7 +499,7 @@
               [pt]="ptm('pcDecrementButton')"
               [attr.data-pc-group-section]="'timepickerbutton'"
             >
-              <ng-template #decIcon2>
+              <ng-template #icon>
                 @if (!decrementIconTemplate() && !_decrementIconTemplate) {
                   <svg data-p-icon="chevron-down" [pBind]="ptm('pcDecrementButton')['icon']" />
                 }
@@ -533,7 +533,7 @@
                 [pt]="ptm('pcIncrementButton')"
                 [attr.data-pc-group-section]="'timepickerbutton'"
               >
-                <ng-template #incIcon3>
+                <ng-template #icon>
                   @if (!incrementIconTemplate() && !_incrementIconTemplate) {
                     <svg data-p-icon="chevron-up" [pBind]="ptm('pcIncrementButton')['icon']" />
                   }
@@ -543,10 +543,10 @@
                 </ng-template>
               </p-button>
               <span [pBind]="ptm('second')">
-                @if ((currentSecond ?? 0) < 10) {
+                @if (currentSecond() < 10) {
                   0
                 }
-                {{ currentSecond }}</span
+                {{ currentSecond() }}</span
               >
               <p-button
                 rounded
@@ -565,7 +565,7 @@
                 [pt]="ptm('pcDecrementButton')"
                 [attr.data-pc-group-section]="'timepickerbutton'"
               >
-                <ng-template #decIcon3>
+                <ng-template #icon>
                   @if (!decrementIconTemplate() && !_decrementIconTemplate) {
                     <svg data-p-icon="chevron-down" [pBind]="ptm('pcDecrementButton')['icon']" />
                   }
@@ -595,7 +595,7 @@
                 [pt]="ptm('pcIncrementButton')"
                 [attr.data-pc-group-section]="'timepickerbutton'"
               >
-                <ng-template #incIcon4>
+                <ng-template #icon>
                   @if (!incrementIconTemplate() && !_incrementIconTemplate) {
                     <svg data-p-icon="chevron-up" [pBind]="ptm('pcIncrementButton')['icon']" />
                   }
@@ -617,7 +617,7 @@
                 [pt]="ptm('pcDecrementButton')"
                 [attr.data-pc-group-section]="'timepickerbutton'"
               >
-                <ng-template #decIcon4>
+                <ng-template #icon>
                   @if (!decrementIconTemplate() && !_decrementIconTemplate) {
                     <svg data-p-icon="chevron-down" [pBind]="ptm('pcDecrementButton')['icon']" />
                   }
@@ -649,7 +649,7 @@
               [label]="getTranslation('today')"
               (keydown)="onContainerButtonKeydown($event)"
               (onClick)="onTodayButtonClick($event)"
-              [ngClass]="todayButtonStyleClass"
+              [class]="todayButtonStyleClass()"
               severity="secondary"
               variant="text"
               size="small"
@@ -662,7 +662,7 @@
               [label]="getTranslation('clear')"
               (keydown)="onContainerButtonKeydown($event)"
               (onClick)="onClearButtonClick($event)"
-              [ngClass]="clearButtonStyleClass"
+              [class]="clearButtonStyleClass()"
               severity="secondary"
               variant="text"
               size="small"

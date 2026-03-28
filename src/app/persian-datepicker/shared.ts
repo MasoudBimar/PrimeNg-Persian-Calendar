@@ -1,15 +1,14 @@
-import { CommonModule } from '@angular/common';
 import { AfterContentInit, Component, contentChild, contentChildren, Directive, inject, input, NgModule, output, TemplateRef } from '@angular/core';
 // @dynamic
 @Component({
-  selector: 'pp-header',
+  selector: 'p-header',
   template: '<ng-content></ng-content>'
 })
 export class Header { }
 
 // @dynamic
 @Component({
-  selector: 'pp-footer',
+  selector: 'p-footer',
   template: '<ng-content></ng-content>'
 })
 export class Footer { }
@@ -145,12 +144,6 @@ export class FooterColumnGroup {
 
   rows = contentChildren(Row);
 }
-
-@NgModule({
-  imports: [CommonModule, Header, Footer, Column, PrimeTemplate, Row, HeaderColumnGroup, FooterColumnGroup],
-  exports: [Header, Footer, Column, PrimeTemplate, Row, HeaderColumnGroup, FooterColumnGroup]
-})
-export class SharedModule { }
 
 
 export function addStyle(element: HTMLElement, style: string | object): void {
