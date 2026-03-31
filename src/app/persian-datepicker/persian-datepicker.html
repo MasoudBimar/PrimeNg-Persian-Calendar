@@ -20,7 +20,7 @@
     [value]="inputFieldValue()"
     (focus)="onInputFocus($event)"
     (keydown)="onInputKeydown($event)"
-    (click)="onInputClick($event)"
+    (click)="onInputClick()"
     (blur)="onInputBlur($event)"
     [attr.required]="required() ? '' : undefined"
     [attr.readonly]="readonlyInput() ? '' : undefined"
@@ -117,7 +117,7 @@
   <p-motion
     [visible]="inline() || overlayVisible()"
     name="p-anchored-overlay"
-    [appear]="!inline"
+    [appear]="!inline()"
     [options]="computedMotionOptions()"
     (onBeforeEnter)="onOverlayBeforeEnter($event)"
     (onAfterLeave)="onOverlayAfterLeave($event)"
@@ -291,7 +291,7 @@
                                 [class]="dayClass(date)"
                                 (click)="onDateSelect($event, date)"
                                 draggable="false"
-                                [attr.data-date]="formatDateKey(formatDateMetaToDate(date))"
+                                [attr.data-date]="formatDataAndMetaData(date)"
                                 (keydown)="onDateCellKeydown($event, date, i)"
                                 pRipple
                                 [pBind]="ptm('day')"
@@ -343,7 +343,7 @@
         </div>
         @if (view() === 'month') {
           <div [class]="cx('monthView')" [pBind]="ptm('monthView')">
-            @for (m of monthPickerValues; track m; let i = $index) {
+            @for (m of monthPickerValues(); track m; let i = $index) {
               <span
                 (click)="onMonthSelect($event, i)"
                 (keydown)="onMonthCellKeydown($event, i)"

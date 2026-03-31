@@ -3,10 +3,10 @@ import {
   AfterContentInit,
   Component, computed, contentChild, contentChildren, effect, ElementRef,
   forwardRef, inject, input, model, OnDestroy, OnInit, output,
-  signal, TemplateRef, viewChild
+  signal, TemplateRef, untracked, viewChild
 } from '@angular/core';
 import { MotionEvent, MotionOptions } from '@primeuix/motion';
-import moment, { isDate } from 'jalali-moment';
+import moment, { isDate, isMoment } from 'jalali-moment';
 import 'moment/locale/fa';
 import { Bind, BindModule } from 'primeng/bind';
 import { InputText } from 'primeng/inputtext';
@@ -24,130 +24,23 @@ import { PARENT_INSTANCE } from 'primeng/basecomponent';
 import { BaseInput } from 'primeng/baseinput';
 import { Button, ButtonModule } from 'primeng/button';
 import { DatePickerButtonBarTemplateContext, DatePickerDateTemplateContext, DatePickerDecadeTemplateContext, DatePickerDisabledDateTemplateContext, DatePickerInputIconTemplateContext, DatePickerModule, DatePickerMonthChangeEvent, DatePickerPassThrough, DatePickerResponsiveOptions, DatePickerStyle, DatePickerTypeView, DatePickerYearChangeEvent, NavigationState } from 'primeng/datepicker';
-import { ConnectedOverlayScrollHandler, DomHandler } from 'primeng/dom';
+import { blockBodyScroll, ConnectedOverlayScrollHandler, DomHandler } from 'primeng/dom';
 import { CalendarIcon, ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon, ChevronUpIcon, TimesIcon } from 'primeng/icons';
 import { Ripple } from 'primeng/ripple';
-import { addStyle, getIndex, hasClass, PrimeTemplate } from './shared';
-declare type Nullable<T = void> = T | null | undefined;
-declare type VoidListener = VoidFunction | null | undefined;
-declare interface DateMeta {
-  day: number,
-  month: number,
-  year: number,
-  // today: boolean,
-  selectable: boolean,
-  // otherMonth?: boolean,
-}
+import { addStyle, formatDateMetaToDate, getIndex, hasClass, isDateArray, isDateBetween, isDateEquals, isToday, isValidDate, PrimeTemplate } from './shared';
+import { Nullable } from 'primeng/ts-helpers';
+import { DateMeta, ENGLISH_LOCALE, LocaleSettings, PERSIAN_LOCALE, VoidListener } from './model';
 
 export const CALENDAR_VALUE_ACCESSOR: any = {
   provide: NG_VALUE_ACCESSOR,
   useExisting: forwardRef(() => PersianDatepickerComponent),
   multi: true
 };
-export interface LocaleSettings {
-  firstDayOfWeek?: number;
-  dayNames: string[];
-  dayNamesShort: string[];
-  dayNamesMin: string[];
-  monthNames: string[];
-  monthNamesShort: string[];
-  today: string;
-  clear: string;
-  dateFormat?: string;
-}
-
-export const PERSIAN_LOCALE: LocaleSettings = {
-  firstDayOfWeek: 0,
-  dayNames: [" شنبه", "یک شنبه", "دو شنبه ", "سه شنبه", "چهار شنبه", " پنج شنبه", " جمعه"],
-  dayNamesShort: ["شن", "یک", "دو ", "س", "چ", " پ", " ج"],
-  dayNamesMin: ["  شنبه", "یک شنبه", "دو شنبه ", "سه شنبه", "چهار شنبه", " پنج شنبه", " جمعه"],
-  monthNames: ["فروردین", "اردیبهشت", "خرداد", "تیر", "مرداد", "شهریور", "مهر", "آبان", "آذر", "دی", "بهمن", "اسفند"],
-  monthNamesShort: ["فروردین", "اردیبهشت", "خرداد", "تیر", "مرداد", "شهریور", "مهر", "آبان", "آذر", "دی", "بهمن", "اسفند"],
-  today: 'امروز',
-  clear: 'پاک کردن',
-  dateFormat: 'yy/mm/dd'
-};
-
-export const ENGLISH_LOCALE: LocaleSettings = {
-  firstDayOfWeek: 0,
-  dayNames: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
-  dayNamesShort: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
-  dayNamesMin: ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"],
-  monthNames: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
-  monthNamesShort: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-  today: 'Today',
-  clear: 'Clear',
-  dateFormat: 'mm/dd/yy'
-};
 
 @Component({
   selector: 'persian-datepicker',
   templateUrl: './persian-datepicker.html',
-  styles: [`
-    .p-datepicker-overlay-enter {
-      animation: p-datepicker-overlay-enter var(--p-datepicker-enter-options, .12s cubic-bezier(0, 0, 0.2, 1)) both;
-    }
-
-    .p-datepicker-overlay-leave {
-      animation: p-datepicker-overlay-leave var(--p-datepicker-leave-options, .1s linear) both;
-    }
-
-    .p-datepicker-overlay-enter-touch {
-      animation: p-datepicker-overlay-enter-touch var(--p-datepicker-enter-options, .12s cubic-bezier(0, 0, 0.2, 1)) both;
-    }
-
-    .p-datepicker-overlay-leave-touch {
-      animation: p-datepicker-overlay-leave-touch var(--p-datepicker-leave-options, .1s linear) both;
-    }
-
-    @keyframes p-datepicker-overlay-enter {
-      from {
-        opacity: 0;
-        transform: translateY(5%);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes p-datepicker-overlay-leave {
-      from {
-        opacity: 1;
-        transform: translateY(0);
-      }
-
-      to {
-        opacity: 0;
-        transform: translateY(5%);
-      }
-    }
-
-    @keyframes p-datepicker-overlay-enter-touch {
-      from {
-        opacity: 0;
-        transform: translate3d(-50%, -40%, 0) scale(0.9);
-      }
-
-      to {
-        opacity: 1;
-        transform: translate(-50%, -50%);
-      }
-    }
-
-    @keyframes p-datepicker-overlay-leave-touch {
-      from {
-        opacity: 1;
-        transform: translate(-50%, -50%);
-      }
-
-      to {
-        opacity: 0;
-        transform: translate3d(-50%, -40%, 0) scale(0.9);
-      }
-    }
-  `],
+  styleUrls: ['./persian-datepicker.scss'],
   providers: [PersianDatepickerService, DatePickerStyle, CALENDAR_VALUE_ACCESSOR, DomHandler, { provide: PARENT_INSTANCE, useExisting: PersianDatepickerComponent }],
   imports: [
     ButtonModule,
@@ -309,17 +202,12 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
 
   overlayLeaveAnimation = computed(() => this.touchUI() ? 'p-datepicker-overlay-leave-touch' : 'p-datepicker-overlay-leave');
 
-  //! should ne refactored
-  calendarType = computed(() => {
-    return this.isJalali();
-  });
-
 
   locale = computed(() => {
     const customLocale = this.customLocale();
     if (!customLocale) {
-      const calendarType = this.calendarType();
-      return calendarType ? PERSIAN_LOCALE : ENGLISH_LOCALE;
+      const isJalali = this.isJalali();
+      return isJalali ? PERSIAN_LOCALE : ENGLISH_LOCALE;
     } else {
       return customLocale;
     }
@@ -331,18 +219,16 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
   })
 
 
-  isJalali = input<boolean>(true);
+  isJalali = input<boolean>(false);
   InitialValue = input<string>();
   style = input<string>();
-  // name = input<string | undefined>();
-  // disabled = model<boolean>(false);
   monthNavigator = input<boolean>();
   yearNavigator = input<boolean>();
   yearRange = input<string>();
   // required = input<boolean>();
   utc = input<boolean>(false);
   customLocale = input<LocaleSettings>();
-  _focusKey: Nullable<string> = null;
+
 
   //#endregion Inputs
 
@@ -350,6 +236,8 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
 
   // @ContentChildren(PrimeTemplate) templates: QueryList<any>;
   templates = contentChildren(PrimeTemplate);
+
+  _focusKey: Nullable<string> = null;
 
   _locale = signal<LocaleSettings>(PERSIAN_LOCALE);
 
@@ -360,9 +248,9 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
 
   inputfieldViewChild = viewChild<ElementRef>('inputfield');
 
-  value: any;
+  value: Date | Date[] | string | null = new Date();
   pm: Nullable<boolean>;
-  mask: Nullable<HTMLDivElement>;
+  mask = signal<Nullable<HTMLDivElement>>(null);
   maskClickListener: VoidListener;
   overlay: Nullable<HTMLElement>;
   responsiveStyleElement: HTMLStyleElement | undefined | null;
@@ -391,7 +279,7 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
 
   onClose = output<HTMLElement>();
 
-  onSelect = output<Date>();
+  onSelect = output<Date | Date[]>();
 
   onClear = output<any>();
 
@@ -467,9 +355,9 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
     const contentWrapper = this.contentWrapper();
 
     if (contentWrapper && this.overlay) {
-      if (this.isMonthNavigate) {
+      if (this.isMonthNavigate()) {
         Promise.resolve(null).then(() => this.updateFocus());
-        this.isMonthNavigate = false;
+        untracked(() => this.isMonthNavigate.set(false));
       } else {
         if (!this.focus && !this.inline()) {
           this.initFocusableCell();
@@ -486,7 +374,7 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
 
   navigationState: Nullable<NavigationState> = null;
 
-  isMonthNavigate: Nullable<boolean>;
+  isMonthNavigate = signal<boolean>(false);
 
   initialized: Nullable<boolean>;
 
@@ -503,13 +391,21 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
     return this._componentStyle.classes.day({ instance: this, date: date });
   }
 
-  monthPickerValues: Nullable<string[]>;
+  monthPickerValues = computed(() => {
+    this.view();
+    this.customLocale();
+    const monthPickerValues = [];
+    for (let i = 0; i <= 11; i++) {
+      monthPickerValues.push(this.locale().monthNamesShort[i]);
+    }
+    return monthPickerValues;
+  });
 
-  invalidDates: Nullable<moment.Moment[]>;
+  invalidDates: Nullable<Date[]>;
 
   datepickerClick: Nullable<boolean>;
 
-  rangeDates: Nullable<moment.Moment[]>;
+  rangeDates: Nullable<Date[]>;
 
   inputFieldValue = signal<string | null>(null);
 
@@ -535,15 +431,6 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
 
   constructor() {
     super();
-    effect(() => {
-      const customLocale = this.customLocale();
-      const view = this.view();
-      if (customLocale) {
-        if (view === 'month') {
-          this.createMonthPickerValues();
-        }
-      }
-    });
 
     const defaultDate = this.defaultDate();
 
@@ -580,7 +467,7 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
       this.showTime();
 
       if (this.currentHour() === undefined) {
-        this.initTime(this.value || moment());
+        this.initTime(this.value || new Date());
       }
       this.updateInputfield();
     });
@@ -603,7 +490,7 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
     this.panelId = `${this.attributeSelector}_panel`;
 
     const date = moment(this.InitialValue()) || moment();
-    if (this.calendarType()) {
+    if (this.isJalali()) {
       this.currentMonth.set(date.jMonth());
       this.currentYear.set(date.jYear());
     }
@@ -621,14 +508,9 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
     }
 
     if (this.view() === 'date') {
-      // this.createWeekDays();
       this.initTime(date.toDate());
-      // this.createMonths(this.currentMonth, this.currentYear);
       this.ticksTo1970 = (((1970 - 1) * 365 + Math.floor(1970 / 4) - Math.floor(1970 / 100) + Math.floor(1970 / 400)) * 24 * 60 * 60 * 10000000);
 
-    }
-    else if (this.view() === 'month') {
-      this.createMonthPickerValues();
     }
     this.initialized = true;
   }
@@ -741,14 +623,6 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
     return weekDays;
   });
 
-  createMonthPickerValues() {
-
-    this.monthPickerValues = [];
-    for (let i = 0; i <= 11; i++) {
-      this.monthPickerValues.push(this.locale().monthNamesShort[i]);
-    }
-  }
-
   yearPickerValues() {
     const yearPickerValues: any[] = [];
     const base = this.currentYear() - (this.currentYear() % 10);
@@ -759,24 +633,13 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
     return yearPickerValues;
   }
 
-  // createMonths(month: number, year: number) {
-  //   this.months = this.months = [];
-  //   for (let i = 0; i < this.numberOfMonths(); i++) {
-  //     let m = month + i;
-  //     let y = year;
-  //     if (m > 11) {
-  //       m = m % 12;
-  //       y = year + Math.floor((month + i) / 12);
-  //     }
-
-  //     this.months.push(this.createMonth(m, y));
-  //   }
-  // }
-
   months = computed(() => {
     const currentYear = this.currentYear();
     const currentMonth = this.currentMonth();
-    const view = this.view();
+    this.view();
+    this.disabledDates();
+    this.disabledDays();
+
     let months = [];
     for (let i = 0; i < this.numberOfMonths(); i++) {
       let m = (currentMonth ?? 0) + i;
@@ -812,7 +675,7 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
     const daysLength = this.getDaysCountInMonth(month, year);
     const prevMonthDaysLength = this.getDaysCountInPrevMonth(month, year);
     let dayNo = 1;
-    const today = moment();
+    const today = new Date();
     const weekNumbers: number[] = [];
     const monthRows: number = Math.ceil((daysLength + firstDay) / 7);
 
@@ -827,7 +690,7 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
             month: prev.month,
             year: prev.year,
             otherMonth: true,
-            today: this.isToday(today, j, prev.month, prev.year),
+            today: isToday(today, j, prev.month, prev.year),
             selectable: this.isSelectable(j, prev.month, prev.year, true)
           });
         }
@@ -838,7 +701,7 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
             day: dayNo,
             month: month,
             year: year,
-            today: this.isToday(today, dayNo, month, year),
+            today: isToday(today, dayNo, month, year),
             selectable: this.isSelectable(dayNo, month, year, false)
           });
           dayNo++;
@@ -853,7 +716,7 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
               month: next.month,
               year: next.year,
               otherMonth: true,
-              today: this.isToday(today, dayNo - daysLength, next.month, next.year),
+              today: isToday(today, dayNo - daysLength, next.month, next.year),
               selectable: this.isSelectable((dayNo - daysLength), next.month, next.year, true)
             });
           }
@@ -862,7 +725,7 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
               day: dayNo,
               month: month,
               year: year,
-              today: this.isToday(today, dayNo, month, year),
+              today: isToday(today, dayNo, month, year),
               selectable: this.isSelectable(dayNo, month, year, false)
             });
           }
@@ -887,9 +750,12 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
     };
   }
 
-  initTime(date: Date | moment.Moment) {
+  initTime(date: Date | Date[] | string) {
+    if (typeof this.value === 'string') {
+      this.value = this.parseValueFromString(this.value);
+    }
 
-    if (date instanceof Date) {
+    if (isDate(date)) {
       this.pm = date.getHours() > 11;
 
       if (this.showTime()) {
@@ -907,7 +773,7 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
         this.currentSecond.set(0);
       }
 
-    } else if (moment.isMoment(date)) {
+    } else if (isMoment(date)) {
       this.pm = date.hours() > 11;
 
       if (this.showTime()) {
@@ -936,7 +802,7 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
       return;
     }
 
-    this.isMonthNavigate = true;
+    this.isMonthNavigate.set(true);
 
     if (this.view() === 'month') {
       this.decrementYear();
@@ -969,7 +835,7 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
       return;
     }
 
-    this.isMonthNavigate = true;
+    this.isMonthNavigate.set(true);
 
     if (this.view() === 'month') {
       this.incrementYear();
@@ -1041,11 +907,11 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
       return;
     }
 
-    if (this.isMultipleSelection() && this.isSelected(dateMeta)) {
-      this.value = this.value.filter((date: Date) => {
-        return !this.isDateEquals(date, dateMeta);
+    if (isDateArray(this.value) && this.isMultipleSelection() && this.isSelected(dateMeta)) {
+      this.value = this.value?.filter((date: Date) => {
+        return !isDateEquals(date, dateMeta);
       });
-      if (this.value.length === 0) {
+      if (this.value?.length === 0) {
         this.value = null;
       }
       this.updateModel(this.value);
@@ -1055,12 +921,12 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
       }
     }
 
-    if (this.hideOnDateTimeSelect() && (this.isSingleSelection() || (this.isRangeSelection() && this.value[1]))) {
+    if (this.hideOnDateTimeSelect() && (this.isSingleSelection() || (this.isRangeSelection() && isDateArray(this.value) && this.value[1]))) {
       setTimeout(() => {
         event.preventDefault();
         this.hideOverlay();
 
-        if (this.mask) {
+        if (this.mask()) {
           this.disableModality();
         }
 
@@ -1074,7 +940,7 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
 
   shouldSelectDate(): boolean {
     const maxDateCount = this.maxDateCount();
-    if (this.isMultipleSelection())
+    if (this.isMultipleSelection() && isDateArray(this.value))
       return !maxDateCount || !this.value || (!!maxDateCount && maxDateCount > this.value.length);
     else
       return true;
@@ -1109,7 +975,7 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
       if (this.isSingleSelection()) {
         formattedValue = this.formatDateTime(this.value);
       }
-      else if (this.isMultipleSelection()) {
+      else if (this.isMultipleSelection() && isDateArray(this.value)) {
         for (let i = 0; i < this.value.length; i++) {
           const dateAsString = this.formatDateTime(this.value[i]);
           formattedValue += dateAsString;
@@ -1118,7 +984,7 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
           }
         }
       }
-      else if (this.isRangeSelection()) {
+      else if (this.isRangeSelection() && isDateArray(this.value)) {
         if (this.value && this.value.length) {
           const startDate = this.value[0];
           const endDate = this.value[1];
@@ -1144,7 +1010,7 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
     let formattedValue = this.keepInvalid() ? date : null;
     const isDateValid = this.isValidDateForTimeConstraints(date);
 
-    if (this.isValidDate(date)) {
+    if (isValidDate(date)) {
       if (this.timeOnly()) {
         formattedValue = this.formatTime(date);
       } else {
@@ -1160,12 +1026,13 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
     return formattedValue;
   }
 
-  formatDateMetaToDate(dateMeta: DateMeta): Date {
-    return new Date(dateMeta.year, dateMeta.month, dateMeta.day);
-  }
-
   formatDateKey(date: Date): string {
     return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+  }
+
+  formatDataAndMetaData(date: any) {
+
+    return this.formatDateKey(formatDateMetaToDate(date));
   }
 
   setCurrentHourPM(hours: number) {
@@ -1188,7 +1055,7 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
   }
 
   selectDate(dateMeta: DateMeta) {
-    const date = this.formatDateMetaToDate(dateMeta);
+    const date = formatDateMetaToDate(dateMeta);
 
     if (this.showTime()) {
       if (this.hourFormat() == '12') {
@@ -1218,10 +1085,10 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
 
     if (this.isSingleSelection()) {
       this.updateModel(date);
-    } else if (this.isMultipleSelection()) {
+    } else if (isDateArray(this.value) && this.isMultipleSelection()) {
       this.updateModel(this.value ? [...this.value, date] : [date]);
     } else if (this.isRangeSelection()) {
-      if (this.value && this.value.length) {
+      if (this.value && isDateArray(this.value)) {
         let startDate = this.value[0];
         let endDate = this.value[1];
 
@@ -1229,7 +1096,7 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
           endDate = date;
         } else {
           startDate = date;
-          endDate = null;
+          // endDate = null;
         }
 
         this.updateModel([startDate, endDate]);
@@ -1252,7 +1119,7 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
         this.onModelChange(this.formatDateTime(this.value));
       } else {
         let stringArrValue: any[] | null = null;
-        if (Array.isArray(this.value)) {
+        if (isDateArray(this.value)) {
           stringArrValue = this.value.map((date: Date) => this.formatDateTime(date));
         }
         this.writeModelValue(stringArrValue);
@@ -1262,8 +1129,9 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
   }
 
   getFirstDayOfMonthIndex(month: number, year: number) {
-    const day = moment();
-    if (this.calendarType()) {
+
+    if (this.isJalali()) {
+      const day = moment();
       day.jDate(1);
       day.jMonth(month);
       day.jYear(year);
@@ -1271,17 +1139,18 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
       return dayIndex >= 7 ? dayIndex - 7 : dayIndex;
     }
     else {
-      day.date(1);
-      day.month(month);
-      day.year(year);
-      const dayIndex = day.day() + this.getSundayIndex();
+      const day = new Date();
+      day.setDate(1);
+      day.setMonth(month);
+      day.setFullYear(year);
+      const dayIndex = day.getDay() + this.getSundayIndex();
       return dayIndex >= 7 ? dayIndex - 7 : dayIndex;
     }
   }
 
   getDaysCountInMonth(month: number, year: number) {
 
-    if (this.calendarType()) {
+    if (this.isJalali()) {
       const newDate = moment().jYear(year).jMonth(month).jDate(32);
 
       const temp = this.daylightSavingAdjust(newDate).jDate();
@@ -1346,23 +1215,23 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
   isSelected(dateMeta: DateMeta): boolean {
     if (this.value) {
       if (this.isSingleSelection()) {
-        return this.isDateEquals(this.value, dateMeta);
+        return isDateEquals(this.value, dateMeta);
       }
-      else if (this.isMultipleSelection()) {
+      else if (isDateArray(this.value) && this.isMultipleSelection()) {
         let selected = false;
         for (const date of this.value) {
-          selected = this.isDateEquals(date, dateMeta);
+          selected = isDateEquals(date, dateMeta);
           if (selected) {
             break;
           }
         }
         return selected;
       }
-      else if (this.isRangeSelection()) {
+      else if (isDateArray(this.value) && this.isRangeSelection()) {
         if (this.value[1])
-          return this.isDateEquals(this.value[0], dateMeta) || this.isDateEquals(this.value[1], dateMeta) || this.isDateBetween(this.value[0], this.value[1], dateMeta);
+          return isDateEquals(this.value[0], dateMeta) || isDateEquals(this.value[1], dateMeta) || isDateBetween(this.value[0], this.value[1], dateMeta);
         else
-          return this.isDateEquals(this.value[0], dateMeta)
+          return isDateEquals(this.value[0], dateMeta)
       }
     }
     return false;
@@ -1375,25 +1244,30 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
   isMonthSelected(month: number): boolean {
     if (!this.isComparable()) return false;
 
+    if (!this.value) {
+      return false;
+    }
+
     //! should be refactored
-    if (this.isMultipleSelection()) {
-      return this.value.some((currentValue: any) => currentValue.getMonth() === month && currentValue.getFullYear() === this.currentYear());
+    if (this.isMultipleSelection() && isDateArray(this.value)) {
+      return this.value?.some((currentValue: any) => currentValue.getMonth() === month && currentValue.getFullYear() === this.currentYear());
     } else if (this.isRangeSelection()) {
-      if (!this.value[1]) {
+      if (isDateArray(this.value) && !this.value[1]) {
         return this.value[0]?.getFullYear() === this.currentYear() && this.value[0]?.getMonth() === month;
       } else {
         const currentDate = new Date(this.currentYear(), month, 1);
-        const startDate = new Date(this.value[0].getFullYear(), this.value[0].getMonth(), 1);
-        const endDate = new Date(this.value[1].getFullYear(), this.value[1].getMonth(), 1);
+        const startDate = isDateArray(this.value) ? new Date(this.value[0].getFullYear(), this.value[0].getMonth(), 1) : new Date();
+        const endDate = isDateArray(this.value) ? new Date(this.value[1].getFullYear(), this.value[1].getMonth(), 1) : new Date();
 
         return currentDate >= startDate && currentDate <= endDate;
       }
     } else {
 
-      if (this.calendarType())
+      if (this.isJalali() && isMoment(this.value)) {
         return this.value ? (this.value.jMonth() === month && this.value.jYear() === this.currentYear()) : false;
-      else
-        return this.value ? (this.value.month() === month && this.value.year() === this.currentYear()) : false;
+      } else {
+        return isDate(this.value) ? (this.value.getMonth() === month && this.value.getFullYear() === this.currentYear()) : false;
+      }
 
     }
   }
@@ -1417,40 +1291,12 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
 
   isYearSelected(year: number) {
     if (this.isComparable()) {
-      const value = this.isRangeSelection() ? this.value[0] : this.value;
+      const value = (this.isRangeSelection() && isDateArray(this.value)) ? this.value[0] : this.value;
 
-      return !this.isMultipleSelection() ? value.getFullYear() === year : false;
+      return (!this.isMultipleSelection() && isDate(value)) ? value.getFullYear() === year : false;
     }
 
     return false;
-  }
-
-  isDateEquals(value: any, dateMeta: DateMeta): boolean {
-    if (value) {
-      if (isDate(value)) {
-        return value.getDate() === dateMeta.day && value.getMonth() === dateMeta.month && value.getFullYear() === dateMeta.year;
-      } else if (moment.isMoment(value)) {
-        return value.date() === dateMeta.day && value.month() === dateMeta.month && value.year() === dateMeta.year;
-      }
-    }
-    return false;
-  }
-
-  isDateBetween(start: Date, end: Date, dateMeta: DateMeta): boolean;
-  isDateBetween(start: moment.Moment, end: moment.Moment, dateMeta: DateMeta): boolean;
-  isDateBetween(start: any, end: any, dateMeta: DateMeta): boolean {
-    const between: boolean = false;
-    if (isDate(start) && isDate(end)) {
-      const date: Date = this.formatDateMetaToDate(dateMeta);
-      return start.getTime() <= date.getTime() && end.getTime() >= date.getTime();
-    }
-
-    if (moment.isMoment(start) && moment.isMoment(end)) {
-      const date: moment.Moment = moment([dateMeta.year, dateMeta.month, dateMeta.day]);
-      return start.unix() <= date.unix() && end.unix() >= date.unix();
-    }
-
-    return between;
   }
 
   isSingleSelection(): boolean {
@@ -1465,13 +1311,6 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
     return this.selectionMode() === 'multiple';
   }
 
-  isToday(today: moment.Moment, day: number, month: number, year: number): boolean {
-    if (this.calendarType())
-      return today.jDate() === day && today.jMonth() === month && today.jYear() === year;
-    else
-      return today.date() === day && today.month() === month && today.year() === year;
-  }
-
   isSelectable(day: number, month: number, year: number, otherMonth: any): boolean {
     let validMin = true;
     let validMax = true;
@@ -1483,7 +1322,7 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
     }
     const minDate = this.minDate();
     if (minDate) {
-      if (this.calendarType()) {
+      if (this.isJalali()) {
         if (minDate.getFullYear() > year) {
           validMin = false;
         }
@@ -1517,7 +1356,7 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
     }
     const maxDate = this.maxDate();
     if (maxDate) {
-      if (this.calendarType()) {
+      if (this.isJalali()) {
         if (maxDate.getFullYear() < year) {
           validMax = false;
         }
@@ -1533,7 +1372,7 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
         }
       }
       else {
-        if (this.calendarType()) {
+        if (this.isJalali()) {
           if (maxDate.getFullYear() < year) {
             validMax = false;
           }
@@ -1566,7 +1405,7 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
   isDateDisabled(day: number, month: number, year: number): boolean {
     if (this.disabledDates()) {
       for (const disabledDate of this.disabledDates()) {
-        if (this.calendarType()) {
+        if (this.isJalali()) {
           if (disabledDate.getFullYear() === year && disabledDate.getMonth() === month && disabledDate.getDate() === day) {
             return true;
           }
@@ -1586,7 +1425,7 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
   isDayDisabled(day: number, month: number, year: number): boolean {
     if (this.disabledDays()) {
       const weekday = moment([year, month, day]);
-      if (this.calendarType()) {
+      if (this.isJalali()) {
         const weekdayNumber = weekday.jDay();
         return this.disabledDays().indexOf(weekdayNumber) !== -1;
       } else {
@@ -1607,9 +1446,8 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
     this.onFocus.emit(event);
   }
 
-  onInputClick(event: Event) {
+  onInputClick() {
     //! should be refactored
-    event.preventDefault();
     this.datepickerClick = true;
     if (this.overlay && this.autoZIndex()) {
       this.overlay.style.zIndex = String(this.baseZIndex() + (++DomHandler.zindex));
@@ -1683,6 +1521,7 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
   }
 
   onContainerButtonKeydown(event: KeyboardEvent) {
+    console.log(event, '#######################')
     switch (event.which) {
       //tab
       case 9:
@@ -1742,7 +1581,7 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
   onDateCellKeydown(event: any, dateMeta: DateMeta, groupIndex: number) {
     const cellContent = event.currentTarget;
     const cell = cellContent.parentElement;
-    const currentDate = this.formatDateMetaToDate(dateMeta);
+    const currentDate = formatDateMetaToDate(dateMeta);
     switch (event.which) {
       //down arrow
       case 40: {
@@ -2154,32 +1993,34 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
     const contentEl = this.contentViewChild()?.nativeElement;
     let cell!: any;
 
-    if (this.view() === 'month') {
-      const cells = DomHandler.find(contentEl, '.p-datepicker-month-view .p-datepicker-month:not(.p-disabled)');
-      const selectedCell = DomHandler.findSingle(contentEl, '.p-datepicker-month-view .p-datepicker-month.p-highlight');
-      cells.forEach((cell: any) => (cell.tabIndex = -1));
-      cell = selectedCell || cells[0];
+    if (contentEl) {
+      if (this.view() === 'month') {
+        const cells = DomHandler.find(contentEl, '.p-datepicker-month-view .p-datepicker-month:not(.p-disabled)');
+        const selectedCell = DomHandler.findSingle(contentEl, '.p-datepicker-month-view .p-datepicker-month.p-highlight');
+        cells.forEach((cell: any) => (cell.tabIndex = -1));
+        cell = selectedCell || cells[0];
 
-      if (cells.length === 0) {
-        const disabledCells = DomHandler.find(contentEl, '.p-datepicker-month-view .p-datepicker-month.p-disabled[tabindex = "0"]');
-        disabledCells.forEach((cell: any) => (cell.tabIndex = -1));
-      }
-    } else if (this.view() === 'year') {
-      const cells = DomHandler.find(contentEl, '.p-datepicker-year-view .p-datepicker-year:not(.p-disabled)');
-      const selectedCell = DomHandler.findSingle(contentEl, '.p-datepicker-year-view .p-datepicker-year.p-highlight');
-      cells.forEach((cell: any) => (cell.tabIndex = -1));
-      cell = selectedCell || cells[0];
+        if (cells.length === 0) {
+          const disabledCells = DomHandler.find(contentEl, '.p-datepicker-month-view .p-datepicker-month.p-disabled[tabindex = "0"]');
+          disabledCells.forEach((cell: any) => (cell.tabIndex = -1));
+        }
+      } else if (this.view() === 'year') {
+        const cells = DomHandler.find(contentEl, '.p-datepicker-year-view .p-datepicker-year:not(.p-disabled)');
+        const selectedCell = DomHandler.findSingle(contentEl, '.p-datepicker-year-view .p-datepicker-year.p-highlight');
+        cells.forEach((cell: any) => (cell.tabIndex = -1));
+        cell = selectedCell || cells[0];
 
-      if (cells.length === 0) {
-        const disabledCells = DomHandler.find(contentEl, '.p-datepicker-year-view .p-datepicker-year.p-disabled[tabindex = "0"]');
-        disabledCells.forEach((cell: any) => (cell.tabIndex = -1));
-      }
-    } else {
-      cell = DomHandler.findSingle(contentEl, 'span.p-highlight');
-      if (!cell) {
-        const todayCell = DomHandler.findSingle(contentEl, 'td.p-datepicker-today span:not(.p-disabled):not(.p-ink)');
-        if (todayCell) cell = todayCell;
-        else cell = DomHandler.findSingle(contentEl, '.p-datepicker-calendar td span:not(.p-disabled):not(.p-ink)');
+        if (cells.length === 0) {
+          const disabledCells = DomHandler.find(contentEl, '.p-datepicker-year-view .p-datepicker-year.p-disabled[tabindex = "0"]');
+          disabledCells.forEach((cell: any) => (cell.tabIndex = -1));
+        }
+      } else {
+        cell = DomHandler.findSingle(contentEl, 'span.p-highlight');
+        if (!cell) {
+          const todayCell = DomHandler.findSingle(contentEl, 'td.p-datepicker-today span:not(.p-disabled):not(.p-ink)');
+          if (todayCell) cell = todayCell;
+          else cell = DomHandler.findSingle(contentEl, '.p-datepicker-calendar td span:not(.p-disabled):not(.p-ink)');
+        }
       }
     }
 
@@ -2283,14 +2124,12 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
       if (!this.value) {
         this.value = [new Date(), new Date()];
       }
-      if (isRange) {
+      if (isDateArray(this.value) && isRange) {
         value = this.value[1] || this.value[0];
-      }
-      if (isMultiple) {
         value = this.value[this.value.length - 1];
       }
     }
-    const valueDateString = value ? value.toDateString() : null;
+    const valueDateString = (value && isDate(value)) ? value.toDateString() : null;
     const isMinDate = this.minDate() && valueDateString && this.minDate()?.toDateString() === valueDateString;
     const isMaxDate = this.maxDate() && valueDateString && this.maxDate()?.toDateString() === valueDateString;
 
@@ -2377,7 +2216,7 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
 
   toggleAMPMIfNotMinDate(newPM: boolean) {
     const value = this.value;
-    const valueDateString = value ? value.toDateString() : null;
+    const valueDateString = isDate(value) ? value.toDateString() : null;
     const isMinDate = this.minDate && valueDateString && this.minDate()?.toDateString() === valueDateString;
     if (isMinDate && this.minDate()!.getHours() >= 12) {
       this.pm = true;
@@ -2510,35 +2349,30 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
   }
 
   updateTime() {
-    let value = this.value;
-    if (this.isRangeSelection()) {
+    let value: any = this.value;
+    if (this.isRangeSelection() && isDateArray(this.value)) {
       value = this.value[1] || this.value[0];
     }
-    if (this.isMultipleSelection()) {
+    if (this.isMultipleSelection() && isDateArray(this.value)) {
       value = this.value[this.value.length - 1];
     }
-    value = value ? moment(value.unix()) : moment();
+    value = isDate(value) ? new Date(value.getTime()) : new Date();
 
     if (this.hourFormat() == '12') {
-      if (this.currentHour() === 12)
-        value.hour(this.pm ? 12 : 0);
-      else
-        value.hour(this.pm ? (this.currentHour() ?? 0) + 12 : this.currentHour());
-    }
-    else {
-      value.hour(this.currentHour());
+      if (this.currentHour() === 12) value.setHours(this.pm ? 12 : 0);
+      else value.setHours(this.pm ? this.currentHour() + 12 : this.currentHour());
+    } else {
+      value.setHours(this.currentHour());
     }
 
-    value.minute(this.currentMinute());
-    value.second(this.currentSecond());
-    if (this.isRangeSelection()) {
-      if (this.value[1])
-        value = [this.value[0], value];
-      else
-        value = [value, null];
+    value.setMinutes(this.currentMinute());
+    value.setSeconds(this.currentSecond());
+    if (this.isRangeSelection() && isDateArray(this.value)) {
+      if (this.value[1]) value = [this.value[0], value];
+      else value = [value, null] as Date[];
     }
 
-    if (this.isMultipleSelection()) {
+    if (this.isMultipleSelection() && isDateArray(this.value)) {
       value = [...this.value.slice(0, -1), value];
     }
 
@@ -2571,7 +2405,7 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
     try {
       const value = this.parseValueFromString(val);
       if (value) {
-        if (this.calendarType()) {
+        if (this.isJalali() && isMoment(value)) {
           if (this.isSelectable(value.jDate(), value.jMonth(), value.jYear(), false)) {
             this.updateModel(value);
             this.updateUI();
@@ -2579,7 +2413,7 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
           }
         }
         else {
-          if (this.isSelectable(value.date(), value.month(), value.year(), false)) {
+          if (isDate(value) && this.isSelectable(value.getDate(), value.getMonth(), value.getFullYear(), false)) {
             this.updateModel(value);
             this.updateUI();
 
@@ -2611,12 +2445,12 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
     return isValid;
   }
 
-  parseValueFromString(text: string): moment.Moment | null {
+  parseValueFromString(text: string): Date | Date[] | null {
     if (!text || text.trim().length === 0) {
       return null;
     }
 
-    let value: any;
+    let value: Nullable<Date | Date[]> = null;
 
     if (this.isSingleSelection()) {
       value = this.parseDateTime(text);
@@ -2625,18 +2459,35 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
       const tokens = text.split(',');
       value = [];
       for (const token of tokens) {
-        value.push(this.parseDateTime(token.trim()));
+        let parsedDate = this.parseDateTime(token.trim());
+        if (isDate(parsedDate)) {
+          value.push(parsedDate);
+        }
       }
     }
     else if (this.isRangeSelection()) {
       const tokens = text.split(' - ');
       value = [];
       for (let i = 0; i < tokens.length; i++) {
-        value[i] = this.parseDateTime(tokens[i].trim());
+        if (tokens[i].trim()) {
+          let parsedValue = this.parseDateTime(tokens[i].trim());
+          if (isDate(parsedValue)) {
+            value.push(parsedValue);
+          }
+        }
       }
     }
 
     return value;
+  }
+
+  convertToJalali(value: Date | moment.Moment | moment.Moment[] | null): moment.Moment | moment.Moment[] | null {
+    if (value instanceof Date) {
+      return moment(value).locale('fa');
+    } else if (Array.isArray(value)) {
+      return value.map(v => moment(v).locale('fa'));
+    }
+    return null;
   }
 
   parseDateTime(text: string): Date | null {
@@ -2672,30 +2523,27 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
     value.second(time.second);
   }
 
-  isValidDate(date: moment.Moment | Date): boolean;
-  isValidDate(date: moment.Moment | Date): boolean;
-  isValidDate(date: any): boolean {
-    if (date instanceof Date) {
-      return isDate(date);
-    } else if (moment.isMoment(date)) {
-      return date.isValid();
-    }
-    return false;
-  }
-
   updateUI() {
+    let propValue: Date | null = null;
 
-    let propValue = this.value;
-    if (Array.isArray(propValue)) {
-      propValue = propValue.length === 2 ? propValue[1] : propValue[0];
+    if (isDateArray(this.value)) {
+      propValue = this.value.length === 2 ? this.value[1] : this.value[0];
+    } else if (typeof this.value === 'string') {
+      const parsed = this.parseValueFromString(this.value);
+      propValue = isDateArray(parsed) ? (parsed.length === 2 ? parsed[1] : parsed[0]) : parsed;
     }
 
-    const val = this.defaultDate() && this.isValidDate(this.defaultDate()!) && !this.value ? this.defaultDate() : propValue && this.isValidDate(propValue) ? propValue : new Date();
+    const defaultDate = this.defaultDate();
+
+    const val = defaultDate && isValidDate(defaultDate) && !this.value
+      ? this.defaultDate()
+      : (propValue && isValidDate(propValue))
+        ? propValue
+        : new Date();
 
     if (val && val instanceof Date) {
       this.currentMonth.set(val.getMonth());
       this.currentYear.set(val.getFullYear());
-      // this.createMonths(this.currentMonth, this.currentYear);
 
       if (this.showTime() || this.timeOnly()) {
         this.setCurrentHourPM(val.getHours());
@@ -2810,34 +2658,35 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
   }
 
   enableModality(element: Nullable<HTMLElement>) {
-    if (!this.mask) {
-      this.mask = document.createElement('div');
-      this.mask.style.zIndex = String(parseInt(element?.style?.zIndex ?? '0') - 1);
-      const maskStyleClass = 'ui-widget-overlay ui-datepicker-mask ui-datepicker-mask-scrollblocker';
-      DomHandler.addMultipleClasses(this.mask, maskStyleClass);
+    if (!this.mask() && this.touchUI()) {
+      this.mask.set(this.renderer.createElement('div'));
+      this.renderer.setStyle(this.mask, 'zIndex', String(parseInt(element?.style?.zIndex ?? '0') - 1));
+      let maskStyleClass = 'p-overlay-mask p-datepicker-mask p-datepicker-mask-scrollblocker p-overlay-mask p-overlay-mask-enter-active';
+      DomHandler.addClass(this.mask!, maskStyleClass);
 
       this.maskClickListener = this.renderer.listen(this.mask, 'click', () => {
         this.disableModality();
+        this.overlayVisible.set(false);
       });
-      document.body.appendChild(this.mask);
-      DomHandler.addClass(document.body, 'ui-overflow-hidden');
+      this.renderer.appendChild(this.document.body, this.mask);
+      blockBodyScroll();
     }
   }
 
   disableModality() {
-    if (this.mask) {
-      DomHandler.addClass(this.mask, 'p-overlay-mask-leave');
+    if (this.mask()) {
+      DomHandler.addClass(this.mask(), 'p-overlay-mask-leave');
       if (!this.animationEndListener) {
-        this.animationEndListener = this.renderer.listen(this.mask, 'animationend', this.destroyMask.bind(this));
+        this.animationEndListener = this.renderer.listen(this.mask(), 'animationend', this.destroyMask.bind(this));
       }
     }
   }
 
   destroyMask() {
-    if (!this.mask) {
+    if (!this.mask()) {
       return;
     }
-    this.renderer.removeChild(this.document.body, this.mask);
+    this.renderer.removeChild(this.document.body, this.mask());
     const bodyChildren = this.document.body.children;
     let hasBlockerMasks!: boolean;
     for (const bodyChild of bodyChildren) {
@@ -2853,7 +2702,7 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
 
     this.unbindAnimationEndListener();
     this.unbindMaskClickListener();
-    this.mask = null;
+    this.mask.set(null);
   }
 
   unbindMaskClickListener() {
@@ -2882,7 +2731,7 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
   }
 
   unbindAnimationEndListener() {
-    if (this.animationEndListener && this.mask) {
+    if (this.animationEndListener && this.mask()) {
       this.animationEndListener();
       this.animationEndListener = null;
     }
@@ -2976,15 +2825,15 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
     return output;
   }
 
-  formatTime(date: moment.Moment | null) {
+  formatTime(date: Date | null) {
     if (!date) {
       return '';
     }
 
     let output = '';
-    let hours = date.hour();
-    const minutes = date.minute();
-    const seconds = date.second();
+    let hours = date.getHours();
+    const minutes = date.getMinutes();
+    const seconds = date.getSeconds();
 
     if (this.hourFormat() == '12' && hours > 11 && hours != 12) {
       hours -= 12;
@@ -3004,13 +2853,13 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
     }
 
     if (this.hourFormat() == '12') {
-      output += date.hour() > 11 ? ' PM' : ' AM';
+      output += date.getHours() > 11 ? ' PM' : ' AM';
     }
 
     return output;
   }
 
-  parseTime(value: any) {
+  parseTime(value: any): { hour: number, minute: number, second: number | null } {
     const tokens: string[] = value.split(':');
     const validTokenLength = this.showSeconds() ? 3 : 2;
 
@@ -3378,7 +3227,7 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
   }
 
   onOverlayHide() {
-    if (this.mask) {
+    if (this.mask()) {
       this.destroyMask();
     }
 

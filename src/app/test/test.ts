@@ -14,6 +14,7 @@ import { PersianDatepickerComponent } from '../persian-datepicker/persian-datepi
 })
 export class TestComponent {
 
+  isJalali = false;
   date;
   date2 = new Date();
   minDate = moment().add(-2, 'days');
