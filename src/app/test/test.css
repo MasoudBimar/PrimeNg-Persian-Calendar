@@ -7,9 +7,9 @@
 
 .demo-card {
   box-sizing: border-box;
-  flex: 0 0 300px;
-  width: 400px;
-  height: 400px;
+  flex: 0 0 450px;
+  width: 450px;
+  height: 450px;
   padding: 1rem;
   border: 1px solid #d9d9d9;
   border-radius: 12px;

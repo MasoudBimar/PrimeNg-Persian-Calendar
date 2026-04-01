@@ -214,9 +214,6 @@ export function isMomentArray(value: unknown): value is moment.Moment[] {
   return Array.isArray(value) && value.every(isMoment);
 }
 
-export function isValidDate(date: moment.Moment): boolean;
-export function isValidDate(date: Date): boolean;
-export function isValidDate(date: Date[]): boolean;
 export function isValidDate(date: Date | Date[] | moment.Moment | null | undefined): boolean {
   if (!date) {
     return false;
@@ -272,4 +269,17 @@ export function isToday(today: Date | moment.Moment, day: number, month: number,
     return today.getDay() === day && today.getMonth() === month && today.getFullYear() === year;
   }
   return false;
+}
+
+
+const lastIds: { [key: string]: number } = {};
+
+export function uuid(prefix: string = 'pui_id_'): string {
+  if (!Object.hasOwn(lastIds, prefix)) {
+    lastIds[prefix] = 0;
+  }
+
+  lastIds[prefix]++;
+
+  return `${prefix}${lastIds[prefix]}`;
 }
