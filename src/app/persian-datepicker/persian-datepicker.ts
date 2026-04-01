@@ -208,12 +208,11 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
 
   locale = computed(() => {
     const customLocale = this.customLocale();
-    if (!customLocale) {
-      const isJalali = this.isJalali();
-      return isJalali ? PERSIAN_LOCALE : ENGLISH_LOCALE;
-    } else {
+    const isJalali = this.isJalali();
+    if (customLocale) {
       return customLocale;
     }
+    return isJalali ? PERSIAN_LOCALE : ENGLISH_LOCALE
   });
 
   firstDayOfWeek = computed(() => {
@@ -582,16 +581,14 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
   }
 
   weekDays = computed(() => {
-    this.view();
+    this.currentView();
     let dayIndex = this.firstDayOfWeek();
-    const weekDays = [];
-    if (dayIndex) {
-      for (let i = 0; i < 7; i++) {
-        weekDays.push(this.locale().dayNamesMin[dayIndex]);
-        dayIndex = dayIndex == 6 ? 0 : ++dayIndex;
-      }
+    const daysOfWeek = [];
+    for (let i = 0; i < 7; i++) {
+      daysOfWeek.push(this.locale().dayNamesMin[dayIndex]);
+      dayIndex = dayIndex == 6 ? 0 : ++dayIndex;
     }
-    return weekDays;
+    return daysOfWeek;
   });
 
   monthPickerValues = computed(() => {
@@ -622,7 +619,7 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
   months = computed(() => {
     const currentYear = this.currentYear();
     const currentMonth = this.currentMonth();
-    this.view();
+    this.currentView();
     this.disabledDates();
     this.disabledDays();
 
@@ -661,7 +658,7 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
     const daysLength = this.getDaysCountInMonth(month, year);
     const prevMonthDaysLength = this.getDaysCountInPrevMonth(month, year);
     let dayNo = 1;
-    const today = new Date();
+    const today = moment();
     const weekNumbers: number[] = [];
     const monthRows: number = Math.ceil((daysLength + firstDay) / 7);
 
@@ -1476,8 +1473,7 @@ export class PersianDatepickerComponent extends BaseInput<DatePickerPassThrough>
   }
 
   getMonthName(index: number) {
-    //! should be refactored
-    return this.config.getTranslation('monthNames')[index];
+    return this.locale().monthNames[index];
   }
 
   getYear(month: any) {
