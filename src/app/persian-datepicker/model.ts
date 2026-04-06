@@ -1,11 +1,16 @@
+import moment from "jalali-moment";
+
 export declare type VoidListener = VoidFunction | null | undefined;
+
+export declare type DateValueType = Date | Date[] | string | moment.Moment;
+
 export declare interface DateMeta {
   day: number,
   month: number,
   year: number,
-  // today: boolean,
+  today?: boolean,
   selectable: boolean,
-  // otherMonth?: boolean,
+  otherMonth?: boolean,
 }
 
 

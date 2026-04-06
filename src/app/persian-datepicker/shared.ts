@@ -1,6 +1,7 @@
 import { AfterContentInit, Component, contentChild, contentChildren, Directive, inject, input, output, TemplateRef } from '@angular/core';
 import moment, { isDate, isMoment } from 'jalali-moment';
-import { DateMeta } from './model';
+import { DateMeta, DateValueType } from './model';
+import { Nullable } from 'primeng/ts-helpers';
 // @dynamic
 @Component({
   selector: 'p-header',
@@ -214,7 +215,7 @@ export function isMomentArray(value: unknown): value is moment.Moment[] {
   return Array.isArray(value) && value.every(isMoment);
 }
 
-export function isValidDate(date: Date | Date[] | moment.Moment | null | undefined): boolean {
+export function isValidDate(date: Nullable<DateValueType>): boolean {
   if (!date) {
     return false;
   }
@@ -282,4 +283,132 @@ export function uuid(prefix: string = 'pui_id_'): string {
   lastIds[prefix]++;
 
   return `${prefix}${lastIds[prefix]}`;
+}
+
+
+export function formatDateKey(date: Date): string {
+  return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+}
+
+export function convertTo24Hour(hours: number, pm: boolean, hourFormat: string): number {
+  if (hourFormat == '12') {
+    if (hours === 12) {
+      return pm ? 12 : 0;
+    } else {
+      return pm ? hours + 12 : hours;
+    }
+  }
+  return hours;
+}
+
+export function convertToJalali(value: Nullable<DateValueType>): moment.Moment | moment.Moment[] | null {
+  if (value instanceof Date) {
+    return moment(value).locale('fa');
+  } else if (Array.isArray(value)) {
+    return value.map(v => moment(v).locale('fa'));
+  }
+  return null;
+}
+
+export function getFullYear(value: Nullable<DateValueType>): number | number[] | null {
+  if (isDate(value)) {
+    return value.getFullYear();
+  } else if (isDateArray(value)) {
+    return value.map(dateValue => dateValue.getFullYear());
+  } else if (isMoment(value)) {
+    return value.year();
+  } else if (isMomentArray(value)) {
+    return value.map(momentValue => momentValue.year());
+  } else if (typeof value === 'string') {
+    return moment(value).year();
+  }
+  return null;
+}
+
+export function getMonths(value: Nullable<DateValueType>) {
+  if (isDate(value)) {
+    return value.getMonth();
+  } else if (isDateArray(value)) {
+    return value.map(dateValue => dateValue.getMonth());
+  } else if (isMoment(value)) {
+    return value.month();
+  } else if (isMomentArray(value)) {
+    return value.map(momentValue => momentValue.month());
+  } else if (typeof value === 'string') {
+    return moment(value).month();
+  }
+  return null;
+}
+export function getDays(value: Nullable<DateValueType>) {
+  if (isDate(value)) {
+    return value.getDay();
+  } else if (isDateArray(value)) {
+    return value.map(dateValue => dateValue.getDay());
+  } else if (isMoment(value)) {
+    return value.day();
+  } else if (isMomentArray(value)) {
+    return value.map(momentValue => momentValue.day());
+  } else if (typeof value === 'string') {
+    return moment(value).day();
+  }
+  return null;
+}
+export function getHours(value: Nullable<DateValueType>) {
+  if (isDate(value)) {
+    return value.getHours();
+  } else if (isDateArray(value)) {
+    return value.map(dateValue => dateValue.getHours());
+  } else if (isMoment(value)) {
+    return value.hour();
+  } else if (isMomentArray(value)) {
+    return value.map(momentValue => momentValue.hour());
+  } else if (typeof value === 'string') {
+    return moment(value).hour();
+  }
+  return null;
+}
+export function getMinutes(value: Nullable<DateValueType>) {
+  if (isDate(value)) {
+    return value.getMinutes();
+  } else if (isDateArray(value)) {
+    return value.map(dateValue => dateValue.getMinutes());
+  } else if (isMoment(value)) {
+    return value.minute();
+  } else if (isMomentArray(value)) {
+    return value.map(momentValue => momentValue.minute());
+  } else if (typeof value === 'string') {
+    return moment(value).minute();
+  }
+  return null;
+}
+export function getSeconds(value: Nullable<DateValueType>) {
+  if (isDate(value)) {
+    return value.getSeconds();
+  } else if (isDateArray(value)) {
+    return value.map(dateValue => dateValue.getSeconds());
+  } else if (isMoment(value)) {
+    return value.second();
+  } else if (isMomentArray(value)) {
+    return value.map(momentValue => momentValue.second());
+  } else if (typeof value === 'string') {
+    return moment(value).second();
+  }
+  return null;
+}
+
+export function daylightSavingAdjust(date: Date): Date;
+export function daylightSavingAdjust(date: moment.Moment): moment.Moment;
+export function daylightSavingAdjust(date: any): any {
+
+  if (!date) {
+    return null;
+  }
+
+  if (moment.isMoment(date)) {
+    date.set('hour', date.hour() > 12 ? date.hour() + 2 : 0);
+    return date;
+  } else {
+    date.setHours(date.getHours() > 12 ? date.getHours() + 2 : 0);
+    return date;
+  }
 }
