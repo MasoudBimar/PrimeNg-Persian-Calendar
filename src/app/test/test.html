@@ -2,21 +2,21 @@
   <div class="demo-card">
     <h3>fasle</h3>
     <div class="demo-content">
-      <persian-datepicker [isJalali]="isJalali" [(ngModel)]="date2"> </persian-datepicker>
+      <persian-datepicker [isJalali]="isJalali()" [(ngModel)]="date2"> </persian-datepicker>
     </div>
   </div>
 
   <div class="demo-card">
     <h3>preset</h3>
     <div class="demo-content">
-      <persian-datepicker [(ngModel)]="date" [isJalali]="isJalali"> </persian-datepicker>
+      <persian-datepicker [(ngModel)]="date" [isJalali]="isJalali()"> </persian-datepicker>
     </div>
   </div>
 
   <div class="demo-card">
     <h3>Icon</h3>
     <div class="demo-content">
-      <persian-datepicker [showIcon]="true" [isJalali]="isJalali"> </persian-datepicker>
+      <persian-datepicker [showIcon]="true" [isJalali]="isJalali()"> </persian-datepicker>
     </div>
   </div>
   <div class="demo-card">
@@ -28,7 +28,7 @@
         [minDate]="minDate.toDate()"
         [maxDate]="maxDate.toDate()"
         [readonlyInput]="true"
-        [isJalali]="isJalali"
+        [isJalali]="isJalali()"
       >
       </persian-datepicker>
     </div>
@@ -41,7 +41,7 @@
         [disabledDates]="invalidDates"
         [disabledDays]="[0, 6]"
         [readonlyInput]="true"
-        [isJalali]="isJalali"
+        [isJalali]="isJalali()"
       >
       </persian-datepicker>
     </div>
@@ -54,7 +54,7 @@
         [monthNavigator]="true"
         [yearNavigator]="true"
         yearRange="1375:1400"
-        [isJalali]="isJalali"
+        [isJalali]="isJalali()"
       >
       </persian-datepicker>
     </div>
@@ -62,14 +62,14 @@
   <div class="demo-card">
     <h3>Time</h3>
     <div class="demo-content">
-      <persian-datepicker class="p-datepicker" [showTime]="true" [isJalali]="isJalali">
+      <persian-datepicker class="p-datepicker" [showTime]="true" [isJalali]="isJalali()">
       </persian-datepicker>
     </div>
   </div>
   <div class="demo-card">
     <h3>Time Only</h3>
     <div class="demo-content">
-      <persian-datepicker class="p-datepicker" [timeOnly]="true" [isJalali]="isJalali">
+      <persian-datepicker class="p-datepicker" [timeOnly]="true" [isJalali]="isJalali()">
       </persian-datepicker>
     </div>
   </div>
@@ -80,7 +80,7 @@
         class="p-datepicker"
         selectionMode="multiple"
         [readonlyInput]="true"
-        [isJalali]="isJalali"
+        [isJalali]="isJalali()"
       >
       </persian-datepicker>
     </div>
@@ -92,7 +92,7 @@
         class="p-datepicker"
         selectionMode="range"
         [readonlyInput]="true"
-        [isJalali]="isJalali"
+        [isJalali]="isJalali()"
       >
       </persian-datepicker>
     </div>
@@ -100,14 +100,14 @@
   <div class="demo-card">
     <h3>Button Bar</h3>
     <div class="demo-content">
-      <persian-datepicker class="p-datepicker" [showButtonBar]="true" [isJalali]="isJalali">
+      <persian-datepicker class="p-datepicker" [showButtonBar]="true" [isJalali]="isJalali()">
       </persian-datepicker>
     </div>
   </div>
   <div class="demo-card">
     <h3>Date Template</h3>
     <div class="demo-content">
-      <persian-datepicker class="p-datepicker" [isJalali]="isJalali">
+      <persian-datepicker class="p-datepicker" [isJalali]="isJalali()">
         <ng-template pTemplate="date" let-date>
           <span
             [style]="{ backgroundColor: date.day < 21 && date.day > 10 ? '#81C784' : 'inherit' }"
@@ -127,7 +127,7 @@
   <div class="demo-card">
     <h3>Multiple Months</h3>
     <div class="demo-content">
-      <persian-datepicker class="p-datepicker" [numberOfMonths]="3" [isJalali]="isJalali">
+      <persian-datepicker class="p-datepicker" [numberOfMonths]="3" [isJalali]="isJalali()">
       </persian-datepicker>
     </div>
   </div>
@@ -140,7 +140,7 @@
         dateFormat="yy/mm"
         [yearNavigator]="true"
         yearRange="1375:1425"
-        [isJalali]="isJalali"
+        [isJalali]="isJalali()"
       >
       </persian-datepicker>
     </div>
@@ -148,14 +148,14 @@
   <div class="demo-card">
     <h3>Touch UI</h3>
     <div class="demo-content">
-      <persian-datepicker class="p-datepicker" [touchUI]="true" [isJalali]="isJalali">
+      <persian-datepicker class="p-datepicker" [touchUI]="true" [isJalali]="isJalali()">
       </persian-datepicker>
     </div>
   </div>
   <div class="demo-card">
     <h3>Inline</h3>
     <div class="demo-content">
-      <persian-datepicker class="p-datepicker" [inline]="true" [isJalali]="isJalali">
+      <persian-datepicker class="p-datepicker" [inline]="true" [isJalali]="isJalali()">
       </persian-datepicker>
     </div>
   </div>

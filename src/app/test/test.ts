@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import moment from 'jalali-moment';
 import { PersianDatepickerComponent } from '../persian-datepicker/persian-datepicker';
@@ -14,7 +14,7 @@ import { PersianDatepickerComponent } from '../persian-datepicker/persian-datepi
 })
 export class TestComponent {
 
-  isJalali = true;
+  isJalali = signal<boolean>(true);
   date;
   date2 = new Date();
   minDate = moment().add(-2, 'days');

@@ -1,3 +1,8 @@
+p-motion {
+  font-family: 'Noto Naskh Arabic', serif;
+  font-weight: lighter;
+}
+
 .p-datepicker-overlay-enter {
   animation: p-datepicker-overlay-enter var(--p-datepicker-enter-options, .12s cubic-bezier(0, 0, 0.2, 1)) both;
 }

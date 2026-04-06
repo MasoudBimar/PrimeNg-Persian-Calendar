@@ -242,7 +242,12 @@
               </p-button>
             </div>
             @if (currentView() === 'date') {
-              <table [class]="cx('dayView')" role="grid" [pBind]="ptm('table')">
+              <table
+                [class]="cx('dayView')"
+                role="grid"
+                [pBind]="ptm('table')"
+                [style.direction]="isJalali() ? 'rtl' : 'ltr'"
+              >
                 <thead [pBind]="ptm('tableHeader')">
                   <tr [pBind]="ptm('tableHeaderRow')">
                     @if (showWeek()) {
@@ -339,7 +344,11 @@
         }
       </div>
       @if (currentView() === 'month') {
-        <div [class]="cx('monthView')" [pBind]="ptm('monthView')">
+        <div
+          [class]="cx('monthView')"
+          [pBind]="ptm('monthView')"
+          [style.direction]="isJalali() ? 'rtl' : 'ltr'"
+        >
           @for (m of monthPickerValues(); track m; let i = $index) {
             <span
               (click)="onMonthSelect($event, i)"
@@ -360,7 +369,11 @@
         </div>
       }
       @if (currentView() === 'year') {
-        <div [class]="cx('yearView')" [pBind]="ptm('yearView')">
+        <div
+          [class]="cx('yearView')"
+          [pBind]="ptm('yearView')"
+          [style.direction]="isJalali() ? 'rtl' : 'ltr'"
+        >
           @for (y of yearPickerValues(); track y) {
             <span
               (click)="onYearSelect($event, y)"
